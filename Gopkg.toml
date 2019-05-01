@@ -29,22 +29,14 @@
   name = "github.com/aws/aws-lambda-go"
   version = "1.10.0"
 
-[prune]
-  go-tests = true
-  unused-packages = true
-
-[[override]]
-  name = "gopkg.in/fsnotify.v1"
-  source = "gopkg.in/fsnotify/fsnotify.v1"
-
-[[constraint]]
-  name = "github.com/onsi/gomega"
-  version = "1.5.0"
-
-[[override]]
-  name = "github.com/onsi/ginkgo"
-  source = "github.com/onsi/ginkgo"
-
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
   version = "1.19.21"
+
+[[constraint]]
+  name = "github.com/mongodb/mongo-go-driver"
+  version = "0.3.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
