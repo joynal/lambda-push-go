@@ -44,3 +44,7 @@
 [[override]]
   name = "github.com/onsi/ginkgo"
   source = "github.com/onsi/ginkgo"
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "1.19.21"
