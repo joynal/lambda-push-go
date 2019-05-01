@@ -1,0 +1,22 @@
+service: golang-rnd
+
+provider:
+  name: aws
+  runtime: go1.x
+  region: us-east-1
+  memorySize: 128
+
+package:
+  exclude:
+  - ./**
+  include:
+  - ./bin/**
+
+functions:
+  parser:
+    handler: bin/parser
+    events:
+      - stream:
+          arn: arn:aws:kinesis:us-east-1:602579302611:stream/test-parser
+          batchSize: 100
+          startingPosition: LATEST

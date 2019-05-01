@@ -1,0 +1,6 @@
+*.swp
+vendor
+logs
+bin
+.env
+.serverless
