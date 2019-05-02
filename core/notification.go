@@ -68,7 +68,7 @@ type Notification struct {
 	SiteID             primitive.ObjectID `bson:"siteId"`
 	Messages           []Message
 	Browsers           []Browser
-	HideRule           HideRule           `bson:"hideRule"`
+	HideRules          HideRule           `bson:"hideRules"`
 	LaunchURL          string             `bson:"launchUrl"`
 	UserID             primitive.ObjectID `bson:"userId"`
 	SentAt             time.Time          `bson:"sentAt"`

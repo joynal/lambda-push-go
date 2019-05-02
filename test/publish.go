@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -25,7 +26,7 @@ func main() {
 	defer cancel()
 
 	ctx = context.WithValue(ctx, core.DbURL, dbUrl)
-	db, err := core.ConfigDB(ctx, "pushservice")
+	db, err := core.ConfigDB(ctx, "omnikick")
 	if err != nil {
 		log.Fatalf("database configuration failed: %v", err)
 	}
@@ -41,17 +42,33 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("notification: ", notification)
-
 	err = db.Collection("notificationaccounts").FindOne(ctx, bson.D{}).Decode(&notificationAccount)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("notificationAccount: ", notificationAccount)
+	processed, _ := json.Marshal(core.ProcessedNotification{
+		ID:            notification.ID,
+		SiteID:        notification.SiteID,
+		TimeToLive:    notification.TimeToLive,
+		LaunchURL:     notification.LaunchURL,
+		Message:       notification.Messages[0],
+		Browser:       notification.Browsers,
+		HideRules:     notification.HideRules,
+		TotalSent:     notification.TotalSent,
+		SendTo:        notification.SendTo,
+		IsAtLocalTime: false,
 
-	// find notification & notification account
+		// notification account data
+		IsFcmEnabled: notificationAccount.IsFcmEnabled,
+		FcmSenderId:  notificationAccount.FcmSenderId,
+		FcmServerKey: notificationAccount.FcmServerKey,
+		VapidDetails: notificationAccount.VapidDetails,
+	})
+
+	fmt.Println("processed: ", string(processed))
+
 	// json string
 	// send it
 
