@@ -58,6 +58,23 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		gcmAPIKey = notification.FcmServerKey
 	}
 
+	webPushOptions := struct {
+		gcmAPIKey string `json:"gcmAPIKey"`,
+		vapidDetails struct {
+			subject string,
+			publicKey string `json:"publicKey"`,
+			privateKey string `json:"privateKey"`,
+		} `json:"vapidDetails"`,
+		TTL int `json:"TTL"`
+	}{
+		gcmAPIKey: gcmAPIKey,
+		vapidDetails.subject: "https://omnikick.com/",
+		vapidDetails.publicKey: "",
+		vapidDetails.publicKey: "https://omnikick.com/",
+		// TODO: place notification TTL
+		TTL: 43534
+	}
+
 	//   const webPushOptions = {
 	// 	gcmAPIKey,
 	// 	vapidDetails: {
