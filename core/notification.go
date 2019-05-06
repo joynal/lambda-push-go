@@ -63,6 +63,7 @@ type Notification struct {
 	IsProcessed        string             `bson:"isProcessed"`
 	IsSchedule         bool               `bson:"isSchedule"`
 	TimezonesCompleted []string           `bson:"timezonesCompleted"`
+	Timezone           string
 	IsDeleted          bool               `bson:"isDeleted"`
 	FromRSSFeed        bool               `bson:"fromRSSFeed"`
 	SiteID             primitive.ObjectID `bson:"siteId"`

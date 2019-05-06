@@ -20,4 +20,7 @@ type ProcessedNotification struct {
 	FcmSenderId   string       `bson:"FcmSenderId"`
 	FcmServerKey  string       `bson:"FcmServerKey"`
 	VapidDetails  VapidDetails `bson:"vapidDetails"`
+	Timezone      string
+	NoOfCalls     int    `bson:"noOfCalls"`
+	LastID        string `bson:"lastId"`
 }

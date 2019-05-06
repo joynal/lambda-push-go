@@ -18,5 +18,5 @@ functions:
     events:
       - stream:
           arn: arn:aws:kinesis:us-east-1:602579302611:stream/test-parser
-          batchSize: 100
+          batchSize: 1
           startingPosition: LATEST
