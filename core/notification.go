@@ -16,10 +16,11 @@ type Message struct {
 
 // Action - Browser push action configs
 type Action struct {
-	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	Action string
-	Title  string
-	URL    string
+	ID      primitive.ObjectID `bson:"_id,omitempty"`
+	Action  string
+	Title   string
+	URL     string
+	IconURL string `bson:"icon"`
 }
 
 // Browser push configs
@@ -69,10 +70,86 @@ type Notification struct {
 	SiteID             primitive.ObjectID `bson:"siteId"`
 	Messages           []Message
 	Browsers           []Browser
+	Actions            Action
 	HideRules          HideRule           `bson:"hideRules"`
 	LaunchURL          string             `bson:"launchUrl"`
 	UserID             primitive.ObjectID `bson:"userId"`
 	SentAt             time.Time          `bson:"sentAt"`
 	CreatedAt          time.Time          `bson:"createdAt"`
 	UpdatedAt          time.Time          `bson:"updatedAt"`
+}
+
+// ProcessedNotification model
+
+type VAPIDOptions struct {
+	Subject    string
+	PublicKey  string `json:"publicKey"`
+	PrivateKey string `json:"privateKey"`
+}
+
+type WebPushOptions struct {
+	GcmAPIKey    string       `json:"gcmAPIKey"`
+	VapidDetails VAPIDOptions `json:"vapidDetails"`
+	TTL          int          `json:"TTL"`
+}
+
+type ProcessedNotification struct {
+	ID            primitive.ObjectID `bson:"_id,omitempty"`
+	SiteID        primitive.ObjectID `bson:"siteId"`
+	TimeToLive    int                `bson:"timeToLive"`
+	LaunchURL     string             `bson:"launchUrl"`
+	Message       Message
+	Browser       []Browser
+	Actions       Action
+	HideRules     HideRule     `bson:"hideRules"`
+	TotalSent     int          `bson:"totalSent"`
+	SendTo        SendTo       `bson:"sendTo"`
+	IsAtLocalTime bool         `bson:"isAtLocalTime"`
+	IsFcmEnabled  bool         `bson:"isFcmEnabled"`
+	FcmSenderId   string       `bson:"FcmSenderId"`
+	FcmServerKey  string       `bson:"FcmServerKey"`
+	VapidDetails  VapidDetails `bson:"vapidDetails"`
+	Timezone      string
+	NoOfCalls     int    `bson:"noOfCalls"`
+	LastID        string `bson:"lastId"`
+}
+
+type NotificationPayload struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	LaunchURL string             `bson:"launchUrl"`
+	Message   Message
+	Browser   []Browser
+	HideRules HideRule `bson:"hideRules"`
+	Actions   Action
+}
+
+type VapidDetails struct {
+	VapidPublicKeys  string `bson:"vapidPublicKeys"`
+	VapidPrivateKeys string `bson:"vapidPrivateKeys"`
+}
+
+type DisplayCondition struct {
+	Type  string `bson:"type"`
+	Value int    `bson:"value"`
+}
+
+// Notification model
+type NotificationAccount struct {
+	ID                primitive.ObjectID `bson:"_id,omitempty"`
+	DisplayCondition  DisplayCondition   `bson:"displayCondition"`
+	VapidDetails      VapidDetails       `bson:"vapidDetails"`
+	TotalSubscriber   int                `bson:"totalSubscriber"`
+	TotalUnSubscriber int                `bson:"totalUnSubscriber"`
+	Status            bool               `bson:"status"`
+	HTTPSEnabled      bool               `bson:"httpsEnabled"`
+	IsFcmEnabled      bool               `bson:"isFcmEnabled"`
+	FcmSenderId       string             `bson:"FcmSenderId"`
+	FcmServerKey      string             `bson:"FcmServerKey"`
+	IsDeleted         bool               `bson:"isDeleted"`
+	SiteID            primitive.ObjectID `bson:"siteId"`
+	UserID            primitive.ObjectID `bson:"userId"`
+	Domain            string             `bson:"domain"`
+	SubDomain         string             `bson:"subDomain"`
+	CreatedAt         time.Time          `bson:"createdAt"`
+	UpdatedAt         time.Time          `bson:"updatedAt"`
 }

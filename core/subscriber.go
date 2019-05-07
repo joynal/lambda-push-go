@@ -50,3 +50,10 @@ type Subscriber struct {
 	CreatedAt     time.Time            `bson:"createdAt"`
 	UpdatedAt     time.Time            `bson:"updatedAt"`
 }
+
+type SubscriberPayload struct {
+	PushEndpoint string `bson:"pushEndPoint"`
+	Data         NotificationPayload
+	Options      WebPushOptions
+	SubscriberId primitive.ObjectID `bson:"subscriberId"`
+}
