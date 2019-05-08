@@ -8,6 +8,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambdacontext"
+
 	"lambda-push-go/core"
 
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -16,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
+	lambdaSdk "github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/google/uuid"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -35,6 +38,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 	s := session.New(&aws.Config{Region: aws.String(*region)})
 	kc := kinesis.New(s)
+	lambdaClient := lambdaSdk.New(s)
 
 	streamName := aws.String(*stream)
 
@@ -50,6 +54,9 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	}
 
 	fmt.Println("Connected to MongoDB!")
+
+	// notification collection
+	notificationCol := db.Collection("notifications")
 
 	// Business
 	var notification core.ProcessedNotification
@@ -101,7 +108,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		query["segmentations"] = bson.M{"$in": segmentIds}
 	}
 
-	if notification.LastID != "" {
+	if primitive.String(notification.LastID) == "" {
 		query["_id"] = bson.M{"$gt": notification.LastID}
 	}
 
@@ -158,6 +165,8 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 			Data:         processed,
 			PartitionKey: aws.String(id.String()),
 		})
+
+		notification.LastID = elem.ID
 	}
 
 	if err := cur.Err(); err != nil {
@@ -177,24 +186,36 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		fmt.Printf("%v\n", putsOutput)
 	}
 
-	// TODO: finish the recursion
-	if len(subscribers) < batchSize {
-		// 	const update = { updatedAt: new Date() };
-		//   update.totalSent = notification.totalSent + totalSent + subscribers.length;
-		//   if (notification.isAtLocalTime === false) update.isProcessed = 'done';
-		//   await Notification.updateOne({ _id: notification._id }, update);
+	notification.TotalSent += len(subscribers)
 
+	// finish the recursion
+	if len(subscribers) < batchSize {
 		updateQuery := bson.M{"updatedAt": time.Now()}
 		// TODO: fix total sent conflict later
-		updateQuery["totalSent"] = notification.TotalSent + len(subscribers)
+		updateQuery["totalSent"] = notification.TotalSent
 		if notification.IsAtLocalTime == false {
 			updateQuery["isProcessed"] = "done"
 		}
 
+		notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
+
 		return nil
 	}
 
-	// TODO: invoke recursive way
+	// invoke recursive way
+
+	notification.NoOfCalls += 1
+	payload, _ := json.Marshal(notification)
+
+	result, err := lambdaClient.Invoke(&lambdaSdk.InvokeInput{
+		FunctionName:   aws.String(lambdacontext.FunctionName),
+		Qualifier:      aws.String(lambdacontext.FunctionVersion),
+		InvocationType: aws.String("Event"),
+		Payload:        payload,
+	})
+	if err != nil {
+		fmt.Println("invoke:", result)
+	}
 
 	return nil
 }

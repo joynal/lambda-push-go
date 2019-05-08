@@ -16,7 +16,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:613bdbd0c7ff928843c9fff1c52f47b4ba1567b216ca5335369756658948a0d3"
+  digest = "1:080b7fc68e4c692b3332133cf6262dd6ebc85262a72bc4e7152458e4abda3fb8"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -50,13 +50,15 @@
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
+    "private/protocol/restjson",
     "private/protocol/xml/xmlutil",
     "service/kinesis",
+    "service/lambda",
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "2091105f8d54d87f8e99a84a37a5065bd5b3ab9c"
-  version = "v1.19.21"
+  revision = "bdd9cf7816bd404510114e712564cf76683b8355"
+  version = "v1.19.26"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -150,7 +152,7 @@
   name = "golang.org/x/crypto"
   packages = ["pbkdf2"]
   pruneopts = "UT"
-  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
+  revision = "e1dfcc566284e143ba8f9afbb3fa563f2a0d212b"
 
 [[projects]]
   branch = "master"
@@ -181,9 +183,11 @@
   input-imports = [
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
+    "github.com/aws/aws-lambda-go/lambdacontext",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/kinesis",
+    "github.com/aws/aws-sdk-go/service/lambda",
     "github.com/google/uuid",
     "github.com/mongodb/mongo-go-driver/bson",
     "github.com/mongodb/mongo-go-driver/bson/primitive",

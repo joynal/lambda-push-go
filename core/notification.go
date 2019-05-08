@@ -110,8 +110,8 @@ type ProcessedNotification struct {
 	FcmServerKey  string       `bson:"FcmServerKey"`
 	VapidDetails  VapidDetails `bson:"vapidDetails"`
 	Timezone      string
-	NoOfCalls     int    `bson:"noOfCalls"`
-	LastID        string `bson:"lastId"`
+	NoOfCalls     int                `bson:"noOfCalls"`
+	LastID        primitive.ObjectID `bson:"lastId"`
 }
 
 type NotificationPayload struct {
