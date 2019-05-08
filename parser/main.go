@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"lambda-push-go/core"
 
@@ -178,7 +179,19 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 	// TODO: finish the recursion
 	if len(subscribers) < batchSize {
+		// 	const update = { updatedAt: new Date() };
+		//   update.totalSent = notification.totalSent + totalSent + subscribers.length;
+		//   if (notification.isAtLocalTime === false) update.isProcessed = 'done';
+		//   await Notification.updateOne({ _id: notification._id }, update);
 
+		updateQuery := bson.M{"updatedAt": time.Now()}
+		// TODO: fix total sent conflict later
+		updateQuery["totalSent"] = notification.TotalSent + len(subscribers)
+		if notification.IsAtLocalTime == false {
+			updateQuery["isProcessed"] = "done"
+		}
+
+		return nil
 	}
 
 	// TODO: invoke recursive way
