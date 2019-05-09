@@ -1,0 +1,46 @@
+TODO:
+
+* kinesis version:
+    - implement parser
+    - parser unit test
+    - parser integration test
+    - implement sender
+    - sender unit test
+    - sender integration test
+    - reuse db connection
+    - add cold start support
+    - load test
+        - 100k
+        - 1M
+        - 10M
+
+* S3 version:
+    - implement parser
+    - parser unit test
+    - parser integration test
+    - implement sender
+    - sender unit test
+    - sender integration test
+    - load test
+        - 100k
+        - 1M
+        - 10M
+
+* Cloud function & pub/sub version:
+    - implement parser
+    - parser unit test
+    - parser integration test
+    - implement sender
+    - sender unit test
+    - sender integration test
+    - reuse db connection
+    - add cold start support
+    - load test
+        - 100k
+        - 1M
+        - 10M
+
+- performance, cost, maintenance compare
+- choose right one
+- documentation & deploy guide
+- write article about whole experience
