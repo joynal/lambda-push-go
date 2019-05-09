@@ -8,8 +8,6 @@ import (
 
 	"lambda-push-go/core"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -35,7 +33,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	fmt.Println("Connected to MongoDB!")
 
 	// notification collection
-	subscriberCol := db.Collection("notificationsubscribers")
+	// subscriberCol := db.Collection("notificationsubscribers")
 
 	var subscriberData core.SubscriberPayload
 	for _, record := range event.Records {
@@ -52,9 +50,11 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 			VAPIDPrivateKey: subscriberData.Options.VAPIDPrivateKey,
 			TTL:             subscriberData.Options.TTL,
 		})
+
+		// TODO: find the correct code for unsubscribe
 		if err != nil {
 			log.Println(err)
-			subscriberCol.UpdateOne(dbCtx, bson.M{"_id": subscriberData.SubscriberID}, bson.M{"status": "unSubscribed"})
+			// subscriberCol.UpdateOne(dbCtx, bson.M{"_id": subscriberData.SubscriberID}, bson.M{"status": "unSubscribed"})
 		}
 	}
 
