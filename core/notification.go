@@ -88,9 +88,11 @@ type VAPIDOptions struct {
 }
 
 type WebPushOptions struct {
-	GcmAPIKey    string       `json:"gcmAPIKey"`
-	VapidDetails VAPIDOptions `json:"vapidDetails"`
-	TTL          int          `json:"TTL"`
+	GcmAPIKey       string
+	Subscriber      string
+	VAPIDPublicKey  string
+	VAPIDPrivateKey string
+	TTL             int `json:"TTL"`
 }
 
 type ProcessedNotification struct {

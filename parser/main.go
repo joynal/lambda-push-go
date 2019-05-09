@@ -117,13 +117,11 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	}
 
 	webPushOptions := core.WebPushOptions{
-		GcmAPIKey: gcmAPIKey,
-		VapidDetails: core.VAPIDOptions{
-			Subject:    "https://omnikick.com/",
-			PublicKey:  notification.VapidDetails.VapidPublicKeys,
-			PrivateKey: notification.VapidDetails.VapidPrivateKeys,
-		},
-		TTL: notification.TimeToLive,
+		GcmAPIKey:       gcmAPIKey,
+		Subscriber:      "https://omnikick.com/",
+		VAPIDPublicKey:  notification.VapidDetails.VapidPublicKeys,
+		VAPIDPrivateKey: notification.VapidDetails.VapidPrivateKeys,
+		TTL:             notification.TimeToLive,
 	}
 
 	notificationPayload := core.NotificationPayload{
@@ -134,6 +132,8 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		HideRules: notification.HideRules,
 		Actions:   notification.Actions,
 	}
+
+	notificationPayloadStr, _ = json.Marshal(notificationPayload)
 
 	subscriberCol := db.Collection("notificationsubscribers")
 	var subscribers []*kinesis.PutRecordsRequestEntry
@@ -156,9 +156,9 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 		processed, _ := json.Marshal(core.SubscriberPayload{
 			PushEndpoint: elem.PushEndpoint,
-			Data:         notificationPayload,
+			Data:         notificationPayloadStr,
 			Options:      webPushOptions,
-			SubscriberId: elem.ID,
+			SubscriberID: elem.ID,
 		})
 
 		subscribers = append(subscribers, &kinesis.PutRecordsRequestEntry{

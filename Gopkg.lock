@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:bf352d7906418306b207809a24391893d212f3bfaee53b93044084bb9ae930c4"
+  name = "github.com/SherClockHolmes/webpush-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7ed4780304f15dd5a2f5c9e316ce79e9f1c1b6d2"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:95fd14230b48a74765db94f7064f0b5617f52739a164f6d41e5b57bec5b3ff9b"
   name = "github.com/aws/aws-lambda-go"
   packages = [
@@ -59,6 +67,14 @@
   pruneopts = "UT"
   revision = "bdd9cf7816bd404510114e712564cf76683b8355"
   version = "v1.19.26"
+
+[[projects]]
+  digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -148,9 +164,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f92f6956e4059f6a3efc14924d2dd58ba90da25cc57fe07ae3779ef2f5e0c5f2"
+  digest = "1:653b3f255e240b80954709f0f07ecf8f8115983bc87c50d6eeefed0dabd7bed5"
   name = "golang.org/x/crypto"
-  packages = ["pbkdf2"]
+  packages = [
+    "hkdf",
+    "pbkdf2",
+  ]
   pruneopts = "UT"
   revision = "e1dfcc566284e143ba8f9afbb3fa563f2a0d212b"
 
@@ -181,6 +200,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/SherClockHolmes/webpush-go",
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
     "github.com/aws/aws-lambda-go/lambdacontext",

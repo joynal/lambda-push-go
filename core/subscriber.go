@@ -53,7 +53,7 @@ type Subscriber struct {
 
 type SubscriberPayload struct {
 	PushEndpoint string `bson:"pushEndPoint"`
-	Data         NotificationPayload
+	Data         string
 	Options      WebPushOptions
-	SubscriberId primitive.ObjectID `bson:"subscriberId"`
+	SubscriberID primitive.ObjectID `bson:"subscriberId"`
 }
