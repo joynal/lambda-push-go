@@ -88,7 +88,6 @@ type VAPIDOptions struct {
 }
 
 type WebPushOptions struct {
-	GcmAPIKey       string
 	Subscriber      string
 	VAPIDPublicKey  string
 	VAPIDPrivateKey string

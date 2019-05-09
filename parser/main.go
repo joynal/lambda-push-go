@@ -27,7 +27,6 @@ import (
 
 var (
 	dbUrl     = "mongodb://localhost:27017"
-	gcmAPIKey = "config.fcmServerKey"
 	batchSize = 500
 	stream    = flag.String("stream", "test-parser", "your stream name")
 	region    = flag.String("region", "us-east-1", "your AWS region")
@@ -108,16 +107,11 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		query["segmentations"] = bson.M{"$in": segmentIds}
 	}
 
-	if primitive.String(notification.LastID) == "" {
+	if notification.LastID.Hex() == "" {
 		query["_id"] = bson.M{"$gt": notification.LastID}
 	}
 
-	if notification.IsFcmEnabled {
-		gcmAPIKey = notification.FcmServerKey
-	}
-
 	webPushOptions := core.WebPushOptions{
-		GcmAPIKey:       gcmAPIKey,
 		Subscriber:      "https://omnikick.com/",
 		VAPIDPublicKey:  notification.VapidDetails.VapidPublicKeys,
 		VAPIDPrivateKey: notification.VapidDetails.VapidPrivateKeys,
@@ -133,7 +127,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		Actions:   notification.Actions,
 	}
 
-	notificationPayloadStr, _ = json.Marshal(notificationPayload)
+	notificationPayloadStr, _ := json.Marshal(notificationPayload)
 
 	subscriberCol := db.Collection("notificationsubscribers")
 	var subscribers []*kinesis.PutRecordsRequestEntry
@@ -156,7 +150,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 		processed, _ := json.Marshal(core.SubscriberPayload{
 			PushEndpoint: elem.PushEndpoint,
-			Data:         notificationPayloadStr,
+			Data:         string(notificationPayloadStr),
 			Options:      webPushOptions,
 			SubscriberID: elem.ID,
 		})
@@ -191,8 +185,8 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	// finish the recursion
 	if len(subscribers) < batchSize {
 		updateQuery := bson.M{"updatedAt": time.Now()}
-		// TODO: fix total sent conflict later
 		updateQuery["totalSent"] = notification.TotalSent
+
 		if notification.IsAtLocalTime == false {
 			updateQuery["isProcessed"] = "done"
 		}
@@ -203,7 +197,6 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	}
 
 	// invoke recursive way
-
 	notification.NoOfCalls += 1
 	payload, _ := json.Marshal(notification)
 
