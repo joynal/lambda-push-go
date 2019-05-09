@@ -14,9 +14,7 @@ import (
 	webpush "github.com/SherClockHolmes/webpush-go"
 )
 
-var (
-	dbUrl = "mongodb://localhost:27017"
-)
+const dbUrl = "mongodb://localhost:27017"
 
 func handler(ctx context.Context, event events.KinesisEvent) error {
 	// Db connection stuff

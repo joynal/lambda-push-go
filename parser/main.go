@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -25,21 +24,17 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-var (
-	dbUrl     = "mongodb://localhost:27017"
-	batchSize = 500
-	stream    = flag.String("stream", "test-parser", "your stream name")
-	region    = flag.String("region", "us-east-1", "your AWS region")
-)
+const dbUrl = "mongodb://localhost:27017"
+const batchSize = 500
+const stream = "test-parser"
+const region = "us-east-1"
 
 func handler(ctx context.Context, event events.KinesisEvent) error {
-	flag.Parse()
-
-	s := session.New(&aws.Config{Region: aws.String(*region)})
+	s := session.New(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 	lambdaClient := lambdaSdk.New(s)
 
-	streamName := aws.String(*stream)
+	streamName := aws.String(stream)
 
 	// Db connection stuff
 	dbCtx := context.Background()
