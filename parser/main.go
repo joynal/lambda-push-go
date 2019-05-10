@@ -29,7 +29,7 @@ const batchSize = 500
 const stream = "test-parser"
 const region = "us-east-1"
 
-func handler(ctx context.Context, event events.KinesisEvent) error {
+func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOutput, error) {
 	s := session.New(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 	lambdaClient := lambdaSdk.New(s)
@@ -59,7 +59,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 	if err != nil {
 		log.Println("json err ---->", err)
-		return err
+		return lambdaSdk.InvokeOutput{}, err
 	}
 
 	log.Println("noOfCalls:", notification.NoOfCalls)
@@ -188,7 +188,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 		notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
 
-		return nil
+		return lambdaSdk.InvokeOutput{}, nil
 	}
 
 	// invoke recursive way
@@ -205,7 +205,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		fmt.Println("invoke:", result)
 	}
 
-	return nil
+	return *result, nil
 }
 
 func main() {
