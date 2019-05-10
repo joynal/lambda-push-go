@@ -30,7 +30,7 @@ const stream = "test-parser"
 const region = "us-east-1"
 
 func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOutput, error) {
-	s := session.New(&aws.Config{Region: aws.String(region)})
+	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 	lambdaClient := lambdaSdk.New(s)
 
@@ -186,7 +186,7 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 			updateQuery["isProcessed"] = "done"
 		}
 
-		notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
+		_, _ = notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
 
 		return lambdaSdk.InvokeOutput{}, nil
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mongodb/mongo-go-driver/bson"
 	"log"
 
 	"lambda-push-go/core"
@@ -31,15 +32,15 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	fmt.Println("Connected to MongoDB!")
 
 	// notification collection
-	// subscriberCol := db.Collection("notificationsubscribers")
+	subscriberCol := db.Collection("notificationsubscribers")
 
 	var subscriberData core.SubscriberPayload
 	for _, record := range event.Records {
-		json.Unmarshal(record.Kinesis.Data, &subscriberData)
+		_ = json.Unmarshal(record.Kinesis.Data, &subscriberData)
 
 		// Decode subscription
 		s := &webpush.Subscription{}
-		json.Unmarshal([]byte(subscriberData.PushEndpoint), s)
+		_ = json.Unmarshal([]byte(subscriberData.PushEndpoint), s)
 
 		// Send Notification
 		_, err = webpush.SendNotification([]byte(subscriberData.Data), s, &webpush.Options{
@@ -52,7 +53,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		// TODO: find the correct code for unsubscribe
 		if err != nil {
 			log.Println(err)
-			// subscriberCol.UpdateOne(dbCtx, bson.M{"_id": subscriberData.SubscriberID}, bson.M{"status": "unSubscribed"})
+			_, _ = subscriberCol.UpdateOne(dbCtx, bson.M{"_id": subscriberData.SubscriberID}, bson.M{"status": "unSubscribed"})
 		}
 	}
 
