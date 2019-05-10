@@ -1,6 +1,6 @@
 TODO:
 
-* kinesis version:
+* Kinesis version:
     - implement parser
     - parser unit test
     - parser integration test
@@ -13,6 +13,8 @@ TODO:
         - 100k
         - 1M
         - 10M
+
+* Fargate version
 
 * S3 version:
     - implement parser
