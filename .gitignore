@@ -4,3 +4,4 @@ logs
 bin
 .env
 .serverless
+.idea
