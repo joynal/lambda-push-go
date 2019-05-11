@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambdacontext"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"log"
 	"time"
 
@@ -51,29 +52,32 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 	// notification collection
 	notificationCol := db.Collection("notifications")
 
-	log.Println("event:", event)
-
 	// Business
 	var notification core.ProcessedNotification
 	record := event.Records[0]
 	err = json.Unmarshal(record.Kinesis.Data, &notification)
 
 	if err != nil {
-		log.Println("json err ---->", err)
+		fmt.Println("json err ---->", err)
 		return lambdaSdk.InvokeOutput{}, err
 	}
 
-	log.Println("noOfCalls:", notification.NoOfCalls)
-	log.Println("totalSent:", notification.TotalSent)
-	log.Println("lastId:", notification.LastID)
+	fmt.Println("noOfCalls:", notification.NoOfCalls)
+	fmt.Println("totalSent:", notification.TotalSent)
+	fmt.Println("lastId:", notification.LastID)
 
-	query := bson.M{"siteId": notification.SiteID, "status": "subscribed"}
+	query := bson.M{
+		"_id": bson.M{"$gt": notification.LastID},
+		"siteId": notification.SiteID,
+		"status": "subscribed",
+	}
 
+	// if notification have timezone
 	if notification.Timezone != "" {
 		query["timezone"] = notification.Timezone
 	}
 
-	// apply segmentation
+	// apply segmentation to subscriber query
 	segmentCol := db.Collection("notificationsegments")
 	if notification.SendTo.AllSubscriber == false {
 		segmentQuery := bson.M{"_id": bson.M{"$in": notification.SendTo.Segments}, "isDeleted": false}
@@ -103,10 +107,6 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 		query["segmentations"] = bson.M{"$in": segmentIds}
 	}
 
-	if notification.LastID.Hex() == "" {
-		query["_id"] = bson.M{"$gt": notification.LastID}
-	}
-
 	webPushOptions := core.WebPushOptions{
 		Subscriber:      "https://omnikick.com/",
 		VAPIDPublicKey:  notification.VapidDetails.VapidPublicKeys,
@@ -125,9 +125,15 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 
 	notificationPayloadStr, _ := json.Marshal(notificationPayload)
 
+	// query options, limit size
+	opts := options.Find()
+	opts.SetLimit(int64(batchSize))
+
 	subscriberCol := db.Collection("notificationsubscribers")
 	var subscribers []*kinesis.PutRecordsRequestEntry
-	cur, err := subscriberCol.Find(dbCtx, query)
+
+	// find subscribers and
+	cur, err := subscriberCol.Find(dbCtx, query, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,8 +169,7 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 		log.Fatal(err)
 	}
 
-	testStr, _ := json.Marshal(notification)
-	fmt.Println("notification:", string(testStr))
+	fmt.Println("after LastID:", notification.LastID)
 
 	// send to kinesis
 	if len(subscribers) > 0 {
