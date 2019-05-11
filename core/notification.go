@@ -106,9 +106,6 @@ type ProcessedNotification struct {
 	TotalSent     int          `bson:"totalSent"`
 	SendTo        SendTo       `bson:"sendTo"`
 	IsAtLocalTime bool         `bson:"isAtLocalTime"`
-	IsFcmEnabled  bool         `bson:"isFcmEnabled"`
-	FcmSenderId   string       `bson:"FcmSenderId"`
-	FcmServerKey  string       `bson:"FcmServerKey"`
 	VapidDetails  VapidDetails `bson:"vapidDetails"`
 	Timezone      string
 	NoOfCalls     int                `bson:"noOfCalls"`

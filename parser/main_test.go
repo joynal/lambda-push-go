@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"lambda-push-go/core"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -12,23 +15,10 @@ import (
 var _ = Describe("parser lambda function", func() {
 	var (
 		response lambda.InvokeOutput
-		ctx  context.Context
-		event events.KinesisEvent
+		ctx      context.Context
+		event    events.KinesisEvent
 		err      error
 	)
-
-	JustBeforeEach(func() {
-		var records []events.KinesisEventRecord
-		records = append(records, events.KinesisEventRecord{
-			Kinesis: events.KinesisRecord{
-				Data: []byte("Test string"),
-			},
-		})
-		event = events.KinesisEvent{
-			Records: records,
-		}
-		response, err = handler(ctx, event)
-	})
 
 	AfterEach(func() {
 		response = lambda.InvokeOutput{}
@@ -37,6 +27,19 @@ var _ = Describe("parser lambda function", func() {
 	})
 
 	Context("When the notification payload is plain text", func() {
+		BeforeEach(func() {
+			var records []events.KinesisEventRecord
+			records = append(records, events.KinesisEventRecord{
+				Kinesis: events.KinesisRecord{
+					Data: []byte("Test string"),
+				},
+			})
+			event = events.KinesisEvent{
+				Records: records,
+			}
+			response, err = handler(ctx, event)
+		})
+
 		It("Fails", func() {
 			Expect(err).To(MatchError("invalid character 'T' looking for beginning of value"))
 			Expect(response).To(Equal(lambda.InvokeOutput{}))
@@ -45,16 +48,58 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("When the notification payload is correct json", func() {
 		BeforeEach(func() {
+			notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")
+			siteID, _ := primitive.ObjectIDFromHex("5c82424627ff1506951b7fbb")
+
+			notificationStr, _ := json.Marshal(core.ProcessedNotification{
+				ID:         notificationID,
+				SiteID:     siteID,
+				TimeToLive: 259200,
+				LaunchURL:  "https://joynal.github.io",
+				Message: core.Message{
+					Title:    "Fire on ice",
+					Message:  "Bingo fire on ice returned",
+					Language: "en",
+				},
+				Browser: []core.Browser{
+					{
+						BrowserName: "chrome",
+						IconURL:     "https://cdn.omnikick.com/assets/img/Logo_Smile_blue.png",
+						Vibration:   false,
+					},
+					{
+						BrowserName: "firefox",
+						IconURL:     "https://cdn.omnikick.com/assets/img/Logo_Smile_blue.png",
+						Vibration:   false,
+					},
+				},
+				TotalSent:     0,
+				NoOfCalls: 0,
+				SendTo:        core.SendTo{
+					AllSubscriber: true,
+				},
+				IsAtLocalTime: false,
+
+				// notification account data
+				VapidDetails: core.VapidDetails{
+					VapidPrivateKeys: "",
+					VapidPublicKeys: "",
+				},
+			})
 			var records []events.KinesisEventRecord
 			records = append(records, events.KinesisEventRecord{
 				Kinesis: events.KinesisRecord{
-					Data: []byte(""),
+					Data: []byte(notificationStr),
 				},
 			})
 			event = events.KinesisEvent{
 				Records: records,
 			}
 			response, err = handler(ctx, event)
+		})
+
+		It("should move to next", func() {
+			Expect(err).To(BeNil())
 		})
 	})
 })

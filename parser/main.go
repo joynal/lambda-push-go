@@ -24,7 +24,7 @@ import (
 )
 
 const dbUrl = "mongodb://localhost:27017"
-const batchSize = 500
+const batchSize = 10
 const stream = "test-parser"
 const region = "us-east-1"
 
@@ -62,8 +62,6 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 		log.Println("json err ---->", err)
 		return lambdaSdk.InvokeOutput{}, err
 	}
-
-	log.Println("notification:", notification)
 
 	log.Println("noOfCalls:", notification.NoOfCalls)
 	log.Println("totalSent:", notification.TotalSent)
@@ -164,6 +162,9 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 	if err := cur.Err(); err != nil {
 		log.Fatal(err)
 	}
+
+	testStr, _ := json.Marshal(notification)
+	fmt.Println("notification:", string(testStr))
 
 	// send to kinesis
 	if len(subscribers) > 0 {

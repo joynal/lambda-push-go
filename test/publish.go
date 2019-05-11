@@ -61,9 +61,6 @@ func main() {
 		IsAtLocalTime: false,
 
 		// notification account data
-		IsFcmEnabled: notificationAccount.IsFcmEnabled,
-		FcmSenderId:  notificationAccount.FcmSenderId,
-		FcmServerKey: notificationAccount.FcmServerKey,
 		VapidDetails: notificationAccount.VapidDetails,
 	})
 
