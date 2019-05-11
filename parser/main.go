@@ -4,10 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 	"log"
 	"time"
-
-	"github.com/aws/aws-lambda-go/lambdacontext"
 
 	"lambda-push-go/core"
 
@@ -52,6 +51,8 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 	// notification collection
 	notificationCol := db.Collection("notifications")
 
+	log.Println("event:", event)
+
 	// Business
 	var notification core.ProcessedNotification
 	record := event.Records[0]
@@ -61,6 +62,8 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 		log.Println("json err ---->", err)
 		return lambdaSdk.InvokeOutput{}, err
 	}
+
+	log.Println("notification:", notification)
 
 	log.Println("noOfCalls:", notification.NoOfCalls)
 	log.Println("totalSent:", notification.TotalSent)
@@ -202,10 +205,14 @@ func handler(ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOu
 		Payload:        payload,
 	})
 	if err != nil {
-		fmt.Println("invoke:", result)
+		fmt.Println("invoke error:", err)
 	}
 
-	return *result, nil
+	if err == nil {
+		return *result, nil
+	}
+
+	return lambdaSdk.InvokeOutput{}, nil
 }
 
 func main() {

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 
@@ -17,15 +16,11 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 )
 
-var (
-	stream = flag.String("stream", "test-parser", "your stream name")
-	region = flag.String("region", "us-east-1", "your AWS region")
-	dbUrl  = "mongodb://localhost:27017"
-)
+const dbUrl = "mongodb://localhost:27017"
+const stream = "test-parser"
+const region = "us-east-1"
 
 func main() {
-	flag.Parse()
-
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -72,10 +67,10 @@ func main() {
 		VapidDetails: notificationAccount.VapidDetails,
 	})
 
-	s := session.New(&aws.Config{Region: aws.String(*region)})
+	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 
-	streamName := aws.String(*stream)
+	streamName := aws.String(stream)
 	id := uuid.New()
 
 	putOutput, err := kc.PutRecord(&kinesis.PutRecordInput{

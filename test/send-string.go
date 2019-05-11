@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -9,18 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/kinesis"
 )
 
-var (
-	stream = flag.String("stream", "test-parser", "your stream name")
-	region = flag.String("region", "us-east-1", "your AWS region")
-)
-
 func main() {
-	flag.Parse()
-
-	s := session.New(&aws.Config{Region: aws.String(*region)})
+	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 
-	streamName := aws.String(*stream)
+	streamName := aws.String(stream)
 
 	// put 10 records using PutRecords API
 	entries := make([]*kinesis.PutRecordsRequestEntry, 10)
