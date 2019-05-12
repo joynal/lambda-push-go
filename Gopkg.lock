@@ -24,7 +24,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:080b7fc68e4c692b3332133cf6262dd6ebc85262a72bc4e7152458e4abda3fb8"
+  digest = "1:9a6c75054d139cd1cfac24db4dd3178817c57a70d9b3d8298cf8982bce9b937b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -61,7 +61,9 @@
     "private/protocol/restjson",
     "private/protocol/xml/xmlutil",
     "service/kinesis",
+    "service/kinesis/kinesisiface",
     "service/lambda",
+    "service/lambda/lambdaiface",
     "service/sts",
   ]
   pruneopts = "UT"
@@ -330,11 +332,14 @@
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/kinesis",
+    "github.com/aws/aws-sdk-go/service/kinesis/kinesisiface",
     "github.com/aws/aws-sdk-go/service/lambda",
+    "github.com/aws/aws-sdk-go/service/lambda/lambdaiface",
     "github.com/google/uuid",
     "github.com/mongodb/mongo-go-driver/bson",
     "github.com/mongodb/mongo-go-driver/bson/primitive",
     "github.com/mongodb/mongo-go-driver/mongo",
+    "github.com/mongodb/mongo-go-driver/mongo/options",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
   ]

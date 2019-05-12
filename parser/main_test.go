@@ -28,6 +28,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("When the notification payload is plain text", func() {
 		BeforeEach(func() {
+			kc := &mockKinesisClient{}
+			lc := &mockLambdaClient{}
 			var records []events.KinesisEventRecord
 			records = append(records, events.KinesisEventRecord{
 				Kinesis: events.KinesisRecord{
@@ -37,7 +39,8 @@ var _ = Describe("parser lambda function", func() {
 			event = events.KinesisEvent{
 				Records: records,
 			}
-			response, err = handler(ctx, event)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, event)
 		})
 
 		It("Fails", func() {
@@ -48,6 +51,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("When the notification payload is correct json", func() {
 		BeforeEach(func() {
+			kc := &mockKinesisClient{}
+			lc := &mockLambdaClient{}
 			notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")
 			siteID, _ := primitive.ObjectIDFromHex("5c82424627ff1506951b7fbb")
 
@@ -95,7 +100,8 @@ var _ = Describe("parser lambda function", func() {
 			event = events.KinesisEvent{
 				Records: records,
 			}
-			response, err = handler(ctx, event)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, event)
 		})
 
 		It("should move to next", func() {
