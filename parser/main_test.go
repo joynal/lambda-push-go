@@ -58,38 +58,14 @@ var _ = Describe("parser lambda function", func() {
 			notificationStr, _ := json.Marshal(core.ProcessedNotification{
 				ID:         notificationID,
 				SiteID:     siteID,
-				TimeToLive: 259200,
-				LaunchURL:  "https://joynal.github.io",
-				Message: core.Message{
-					Title:    "Fire on ice",
-					Message:  "Bingo fire on ice returned",
-					Language: "en",
-				},
-				Browser: []core.Browser{
-					{
-						BrowserName: "chrome",
-						IconURL:     "https://cdn.omnikick.com/assets/img/Logo_Smile_blue.png",
-						Vibration:   false,
-					},
-					{
-						BrowserName: "firefox",
-						IconURL:     "https://cdn.omnikick.com/assets/img/Logo_Smile_blue.png",
-						Vibration:   false,
-					},
-				},
 				TotalSent:     0,
 				NoOfCalls: 0,
 				SendTo:        core.SendTo{
 					AllSubscriber: true,
 				},
 				IsAtLocalTime: false,
-
-				// notification account data
-				VapidDetails: core.VapidDetails{
-					VapidPrivateKeys: "",
-					VapidPublicKeys: "",
-				},
 			})
+
 			var records []events.KinesisEventRecord
 			records = append(records, events.KinesisEventRecord{
 				Kinesis: events.KinesisRecord{
