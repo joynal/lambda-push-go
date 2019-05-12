@@ -27,8 +27,8 @@ const batchSize = 10
 const stream = "test-parser"
 const region = "us-east-1"
 
-func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.Context, events.KinesisEvent) (lambdaSdk.InvokeOutput, error) {
-	return func (ctx context.Context, event events.KinesisEvent) (lambdaSdk.InvokeOutput, error) {
+func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.Context, events.KinesisEvent) (core.ProcessedNotification, error) {
+	return func (ctx context.Context, event events.KinesisEvent) (core.ProcessedNotification, error) {
 		// Db connection stuff
 		dbCtx := context.Background()
 		dbCtx, cancel := context.WithCancel(dbCtx)
@@ -52,7 +52,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 
 		if err != nil {
 			fmt.Println("json err ---->", err)
-			return lambdaSdk.InvokeOutput{}, err
+			return core.ProcessedNotification{}, err
 		}
 
 		fmt.Println("noOfCalls:", notification.NoOfCalls)
@@ -162,20 +162,16 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 			log.Fatal(err)
 		}
 
-		fmt.Println("after LastID:", notification.LastID)
-
 		// send to kinesis
 		streamName := aws.String(stream)
 		if len(subscribers) > 0 {
-			putsOutput, err := kc.PutRecords(&kinesis.PutRecordsInput{
+			_, err := kc.PutRecords(&kinesis.PutRecordsInput{
 				Records:    subscribers,
 				StreamName: streamName,
 			})
 			if err != nil {
-				panic(err)
+				fmt.Println("put records error:", err)
 			}
-			// putsOutput has Records, and its shard id and sequence number.
-			fmt.Printf("%v\n", putsOutput)
 		}
 
 		notification.TotalSent += len(subscribers)
@@ -191,7 +187,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 
 			_, _ = notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
 
-			return lambdaSdk.InvokeOutput{}, nil
+			return notification, nil
 		}
 
 		// invoke recursive way
@@ -208,11 +204,11 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 			fmt.Println("invoke error:", err)
 		}
 
-		if err == nil {
-			return *result, nil
+		if err == nil && *result.StatusCode == 200 {
+			return notification, nil
 		}
 
-		return lambdaSdk.InvokeOutput{}, nil
+		return core.ProcessedNotification{}, nil
 	}
 }
 

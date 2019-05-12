@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"lambda-push-go/core"
 
@@ -14,14 +13,14 @@ import (
 
 var _ = Describe("parser lambda function", func() {
 	var (
-		response lambda.InvokeOutput
+		response core.ProcessedNotification
 		ctx      context.Context
 		event    events.KinesisEvent
 		err      error
 	)
 
 	AfterEach(func() {
-		response = lambda.InvokeOutput{}
+		response = core.ProcessedNotification{}
 		ctx = context.TODO()
 		event = events.KinesisEvent{}
 	})
@@ -45,7 +44,7 @@ var _ = Describe("parser lambda function", func() {
 
 		It("Fails", func() {
 			Expect(err).To(MatchError("invalid character 'T' looking for beginning of value"))
-			Expect(response).To(Equal(lambda.InvokeOutput{}))
+			Expect(response).To(Equal(core.ProcessedNotification{}))
 		})
 	})
 
@@ -106,6 +105,9 @@ var _ = Describe("parser lambda function", func() {
 
 		It("should move to next", func() {
 			Expect(err).To(BeNil())
+			Expect(response.NoOfCalls).To(Equal(1))
+			Expect(response.TotalSent).To(Equal(10))
+			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b0761"))
 		})
 	})
 })

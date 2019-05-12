@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/aws/aws-sdk-go/service/kinesis/kinesisiface"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -20,5 +21,7 @@ type mockLambdaClient struct {
 }
 
 func (m *mockLambdaClient) Invoke(*lambda.InvokeInput) (*lambda.InvokeOutput, error) {
-	return &lambda.InvokeOutput{}, nil
+	return &lambda.InvokeOutput{
+		StatusCode: aws.Int64(200),
+	}, nil
 }
