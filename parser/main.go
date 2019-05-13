@@ -55,6 +55,9 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 		fmt.Println("totalSent:", notification.TotalSent)
 		fmt.Println("lastId:", notification.LastID)
 
+		// increase no of calls
+		notification.NoOfCalls += 1
+
 		// Lets prepare subscriber query
 		query := bson.M{
 			"_id": bson.M{"$gt": notification.LastID},
@@ -190,9 +193,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 		}
 
 		// invoke recursive way
-		notification.NoOfCalls += 1
 		payload, _ := json.Marshal(notification)
-
 		result, err := lc.Invoke(&lambdaSdk.InvokeInput{
 			FunctionName:   aws.String(lambdacontext.FunctionName),
 			Qualifier:      aws.String(lambdacontext.FunctionVersion),

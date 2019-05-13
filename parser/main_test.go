@@ -59,7 +59,7 @@ var _ = Describe("parser lambda function", func() {
 		})
 	})
 
-	Context("When the notification payload is correct json", func() {
+	Context("Testing first page", func() {
 		BeforeEach(func() {
 			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
@@ -71,6 +71,101 @@ var _ = Describe("parser lambda function", func() {
 			Expect(response.NoOfCalls).To(Equal(1))
 			Expect(response.TotalSent).To(Equal(10))
 			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b0761"))
+		})
+	})
+
+	Context("Testing second page", func() {
+		BeforeEach(func() {
+			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b0761")
+			notification.NoOfCalls = 1
+			notification.TotalSent = 10
+			notification.LastID = lastId
+			notificationStr, _ := json.Marshal(notification)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+		})
+
+		It("should move to next", func() {
+			Expect(err).To(BeNil())
+			Expect(response.NoOfCalls).To(Equal(2))
+			Expect(response.TotalSent).To(Equal(20))
+			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b076b"))
+		})
+	})
+
+	Context("Testing third page", func() {
+		BeforeEach(func() {
+			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b076b")
+			notification.NoOfCalls = 2
+			notification.TotalSent = 20
+			notification.LastID = lastId
+			notificationStr, _ := json.Marshal(notification)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+		})
+
+		It("should move to next", func() {
+			Expect(err).To(BeNil())
+			Expect(response.NoOfCalls).To(Equal(3))
+			Expect(response.TotalSent).To(Equal(30))
+			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b0775"))
+		})
+	})
+
+	Context("Testing fourth page", func() {
+		BeforeEach(func() {
+			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b0775")
+			notification.NoOfCalls = 3
+			notification.TotalSent = 30
+			notification.LastID = lastId
+			notificationStr, _ := json.Marshal(notification)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+		})
+
+		It("should move to next", func() {
+			Expect(err).To(BeNil())
+			Expect(response.NoOfCalls).To(Equal(4))
+			Expect(response.TotalSent).To(Equal(40))
+			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b077f"))
+		})
+	})
+
+	Context("Testing fifth page", func() {
+		BeforeEach(func() {
+			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b077f")
+			notification.NoOfCalls = 4
+			notification.TotalSent = 40
+			notification.LastID = lastId
+			notificationStr, _ := json.Marshal(notification)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+		})
+
+		It("should move to next", func() {
+			Expect(err).To(BeNil())
+			Expect(response.NoOfCalls).To(Equal(5))
+			Expect(response.TotalSent).To(Equal(50))
+			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b0789"))
+		})
+	})
+
+	Context("Testing sixth page", func() {
+		BeforeEach(func() {
+			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b0789")
+			notification.NoOfCalls = 5
+			notification.TotalSent = 50
+			notification.LastID = lastId
+			notificationStr, _ := json.Marshal(notification)
+			parserLambda := handler(kc, lc)
+			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+		})
+
+		It("should move to next", func() {
+			Expect(err).To(BeNil())
+			Expect(response.NoOfCalls).To(Equal(6))
+			Expect(response.TotalSent).To(Equal(55))
+			Expect(response.LastID.Hex()).To(Equal("5cd664da6fc5221d583b078e"))
 		})
 	})
 })
