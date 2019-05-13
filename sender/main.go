@@ -53,7 +53,10 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		// TODO: find the correct code for unsubscribe
 		if err != nil {
 			log.Println(err)
-			_, _ = subscriberCol.UpdateOne(dbCtx, bson.M{"_id": subscriberData.SubscriberID}, bson.M{"status": "unSubscribed"})
+			_, _ = subscriberCol.UpdateOne(
+				dbCtx,
+				bson.M{"_id": subscriberData.SubscriberID},
+				bson.M{"$set": bson.M{"status": "unSubscribed"}})
 		}
 	}
 

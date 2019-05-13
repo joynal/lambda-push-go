@@ -77,7 +77,11 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing second page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b0761", 1, 10)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+				notification,
+				"5cd664da6fc5221d583b0761",
+				1,
+				10)))
 		})
 
 		It("should move to next", func() {
@@ -91,7 +95,11 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing third page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b076b", 2, 20)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+				notification,
+				"5cd664da6fc5221d583b076b",
+				2,
+				20)))
 		})
 
 		It("should move to next", func() {
@@ -105,7 +113,11 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing fourth page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b0775", 3, 30)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+				notification,
+				"5cd664da6fc5221d583b0775",
+				3,
+				30)))
 		})
 
 		It("should move to next", func() {
@@ -119,7 +131,11 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing fifth page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b077f", 4, 40)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+				notification,
+				"5cd664da6fc5221d583b077f",
+				4,
+				40)))
 		})
 
 		It("should move to next", func() {
@@ -133,7 +149,11 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing sixth page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b0789", 5, 50)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+				notification,
+				"5cd664da6fc5221d583b0789",
+				5,
+				50)))
 		})
 
 		It("should move to next", func() {
