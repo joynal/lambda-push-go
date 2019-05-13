@@ -42,16 +42,12 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 
 		fmt.Println("Connected to MongoDB!")
 
-		// notification collection
-		notificationCol := db.Collection("notifications")
-
-		// Business
+		// process notification json object to struct
 		var notification core.ProcessedNotification
 		record := event.Records[0]
 		err = json.Unmarshal(record.Kinesis.Data, &notification)
 
 		if err != nil {
-			fmt.Println("json err ---->", err)
 			return core.ProcessedNotification{}, err
 		}
 
@@ -59,6 +55,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 		fmt.Println("totalSent:", notification.TotalSent)
 		fmt.Println("lastId:", notification.LastID)
 
+		// Lets prepare subscriber query
 		query := bson.M{
 			"_id": bson.M{"$gt": notification.LastID},
 			"siteId": notification.SiteID,
@@ -174,9 +171,10 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 			}
 		}
 
+		// update total sent
 		notification.TotalSent += len(subscribers)
 
-		// finish the recursion
+		// finish the recursion & update notification
 		if len(subscribers) < batchSize {
 			updateQuery := bson.M{"updatedAt": time.Now()}
 			updateQuery["totalSent"] = notification.TotalSent
@@ -185,6 +183,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 				updateQuery["isProcessed"] = "done"
 			}
 
+			notificationCol := db.Collection("notifications")
 			_, _ = notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
 
 			return notification, nil
@@ -200,6 +199,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 			InvocationType: aws.String("Event"),
 			Payload:        payload,
 		})
+
 		if err != nil {
 			fmt.Println("invoke error:", err)
 		}

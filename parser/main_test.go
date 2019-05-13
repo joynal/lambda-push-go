@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/service/kinesis/kinesisiface"
+	"github.com/aws/aws-sdk-go/service/lambda/lambdaiface"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"lambda-push-go/core"
 
@@ -15,31 +16,41 @@ var _ = Describe("parser lambda function", func() {
 	var (
 		response core.ProcessedNotification
 		ctx      context.Context
-		event    events.KinesisEvent
 		err      error
+		kc kinesisiface.KinesisAPI
+		lc lambdaiface.LambdaAPI
+		notification core.ProcessedNotification
 	)
+
+	BeforeEach(func() {
+		kc = &mockKinesisClient{}
+		lc = &mockLambdaClient{}
+		notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")
+		siteID, _ := primitive.ObjectIDFromHex("5c82424627ff1506951b7fbb")
+		notification = core.ProcessedNotification{
+			ID:         notificationID,
+			SiteID:     siteID,
+			TotalSent:     0,
+			NoOfCalls: 0,
+			SendTo:        core.SendTo{
+				AllSubscriber: true,
+			},
+			IsAtLocalTime: false,
+		}
+	})
 
 	AfterEach(func() {
 		response = core.ProcessedNotification{}
 		ctx = context.TODO()
-		event = events.KinesisEvent{}
+		kc = &mockKinesisClient{}
+		lc = &mockLambdaClient{}
+		notification = core.ProcessedNotification{}
 	})
 
 	Context("When the notification payload is plain text", func() {
 		BeforeEach(func() {
-			kc := &mockKinesisClient{}
-			lc := &mockLambdaClient{}
-			var records []events.KinesisEventRecord
-			records = append(records, events.KinesisEventRecord{
-				Kinesis: events.KinesisRecord{
-					Data: []byte("Test string"),
-				},
-			})
-			event = events.KinesisEvent{
-				Records: records,
-			}
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, event)
+			response, err = parserLambda(ctx, processEvent("Test string"))
 		})
 
 		It("Fails", func() {
@@ -50,33 +61,9 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("When the notification payload is correct json", func() {
 		BeforeEach(func() {
-			kc := &mockKinesisClient{}
-			lc := &mockLambdaClient{}
-			notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")
-			siteID, _ := primitive.ObjectIDFromHex("5c82424627ff1506951b7fbb")
-
-			notificationStr, _ := json.Marshal(core.ProcessedNotification{
-				ID:         notificationID,
-				SiteID:     siteID,
-				TotalSent:     0,
-				NoOfCalls: 0,
-				SendTo:        core.SendTo{
-					AllSubscriber: true,
-				},
-				IsAtLocalTime: false,
-			})
-
-			var records []events.KinesisEventRecord
-			records = append(records, events.KinesisEventRecord{
-				Kinesis: events.KinesisRecord{
-					Data: []byte(notificationStr),
-				},
-			})
-			event = events.KinesisEvent{
-				Records: records,
-			}
+			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, event)
+			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
 		})
 
 		It("should move to next", func() {
