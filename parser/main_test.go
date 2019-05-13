@@ -14,11 +14,11 @@ import (
 
 var _ = Describe("parser lambda function", func() {
 	var (
-		response core.ProcessedNotification
-		ctx      context.Context
-		err      error
-		kc kinesisiface.KinesisAPI
-		lc lambdaiface.LambdaAPI
+		response     core.ProcessedNotification
+		ctx          context.Context
+		err          error
+		kc           kinesisiface.KinesisAPI
+		lc           lambdaiface.LambdaAPI
 		notification core.ProcessedNotification
 	)
 
@@ -28,11 +28,11 @@ var _ = Describe("parser lambda function", func() {
 		notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")
 		siteID, _ := primitive.ObjectIDFromHex("5c82424627ff1506951b7fbb")
 		notification = core.ProcessedNotification{
-			ID:         notificationID,
-			SiteID:     siteID,
-			TotalSent:     0,
+			ID:        notificationID,
+			SiteID:    siteID,
+			TotalSent: 0,
 			NoOfCalls: 0,
-			SendTo:        core.SendTo{
+			SendTo: core.SendTo{
 				AllSubscriber: true,
 			},
 			IsAtLocalTime: false,
@@ -76,13 +76,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("Testing second page", func() {
 		BeforeEach(func() {
-			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b0761")
-			notification.NoOfCalls = 1
-			notification.TotalSent = 10
-			notification.LastID = lastId
-			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b0761", 1, 10)))
 		})
 
 		It("should move to next", func() {
@@ -95,13 +90,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("Testing third page", func() {
 		BeforeEach(func() {
-			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b076b")
-			notification.NoOfCalls = 2
-			notification.TotalSent = 20
-			notification.LastID = lastId
-			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b076b", 2, 20)))
 		})
 
 		It("should move to next", func() {
@@ -114,13 +104,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("Testing fourth page", func() {
 		BeforeEach(func() {
-			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b0775")
-			notification.NoOfCalls = 3
-			notification.TotalSent = 30
-			notification.LastID = lastId
-			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b0775", 3, 30)))
 		})
 
 		It("should move to next", func() {
@@ -133,13 +118,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("Testing fifth page", func() {
 		BeforeEach(func() {
-			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b077f")
-			notification.NoOfCalls = 4
-			notification.TotalSent = 40
-			notification.LastID = lastId
-			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b077f", 4, 40)))
 		})
 
 		It("should move to next", func() {
@@ -152,13 +132,8 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("Testing sixth page", func() {
 		BeforeEach(func() {
-			lastId, _ := primitive.ObjectIDFromHex("5cd664da6fc5221d583b0789")
-			notification.NoOfCalls = 5
-			notification.TotalSent = 50
-			notification.LastID = lastId
-			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(notification, "5cd664da6fc5221d583b0789", 5, 50)))
 		})
 
 		It("should move to next", func() {
