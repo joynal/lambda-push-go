@@ -187,7 +187,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 			}
 
 			notificationCol := db.Collection("notifications")
-			_, _ = notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, updateQuery)
+			_, _ = notificationCol.UpdateOne(dbCtx, bson.M{"_id": notification.ID}, bson.M{"$set": updateQuery})
 
 			return notification, nil
 		}
