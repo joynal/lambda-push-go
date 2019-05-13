@@ -50,7 +50,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("When the notification payload is plain text", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent("Test string"))
+			response, err = parserLambda(ctx, core.ProcessEvent("Test string"))
 		})
 
 		It("Fails", func() {
@@ -63,7 +63,7 @@ var _ = Describe("parser lambda function", func() {
 		BeforeEach(func() {
 			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, core.ProcessEvent(string(notificationStr)))
 		})
 
 		It("should move to next", func() {
@@ -77,7 +77,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing second page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+			response, err = parserLambda(ctx, core.ProcessEvent(core.GetNotificaitonStr(
 				notification,
 				"5cd664da6fc5221d583b0761",
 				1,
@@ -95,7 +95,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing third page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+			response, err = parserLambda(ctx, core.ProcessEvent(core.GetNotificaitonStr(
 				notification,
 				"5cd664da6fc5221d583b076b",
 				2,
@@ -113,7 +113,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing fourth page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+			response, err = parserLambda(ctx, core.ProcessEvent(core.GetNotificaitonStr(
 				notification,
 				"5cd664da6fc5221d583b0775",
 				3,
@@ -131,7 +131,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing fifth page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+			response, err = parserLambda(ctx, core.ProcessEvent(core.GetNotificaitonStr(
 				notification,
 				"5cd664da6fc5221d583b077f",
 				4,
@@ -149,7 +149,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("Testing sixth page", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, processEvent(getNotificaitonStr(
+			response, err = parserLambda(ctx, core.ProcessEvent(core.GetNotificaitonStr(
 				notification,
 				"5cd664da6fc5221d583b0789",
 				5,

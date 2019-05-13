@@ -17,7 +17,7 @@ import (
 
 const dbUrl = "mongodb://localhost:27017"
 
-func handler(ctx context.Context, event events.KinesisEvent) error {
+func handler(ctx context.Context, event events.KinesisEvent) (string, error) {
 	// Db connection stuff
 	dbCtx := context.Background()
 	dbCtx, cancel := context.WithCancel(dbCtx)
@@ -30,9 +30,6 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 	}
 
 	fmt.Println("Connected to MongoDB!")
-
-	// notification collection
-	subscriberCol := db.Collection("notificationsubscribers")
 
 	var subscriberData core.SubscriberPayload
 	for _, record := range event.Records {
@@ -52,7 +49,8 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 
 		// TODO: find the correct code for unsubscribe
 		if err != nil {
-			log.Println(err)
+			fmt.Println("webpush error:", err)
+			subscriberCol := db.Collection("notificationsubscribers")
 			_, _ = subscriberCol.UpdateOne(
 				dbCtx,
 				bson.M{"_id": subscriberData.SubscriberID},
@@ -60,7 +58,7 @@ func handler(ctx context.Context, event events.KinesisEvent) error {
 		}
 	}
 
-	return nil
+	return "done", nil
 }
 
 func main() {
