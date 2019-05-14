@@ -31,7 +31,9 @@ func handler(ctx context.Context, event events.KinesisEvent) (string, error) {
 
 	fmt.Println("Connected to MongoDB!")
 
+	subscriberCol := db.Collection("notificationsubscribers")
 	var subscriberData core.SubscriberPayload
+		
 	for _, record := range event.Records {
 		_ = json.Unmarshal(record.Kinesis.Data, &subscriberData)
 
@@ -40,17 +42,11 @@ func handler(ctx context.Context, event events.KinesisEvent) (string, error) {
 		_ = json.Unmarshal([]byte(subscriberData.PushEndpoint), s)
 
 		// Send Notification
-		_, err = webpush.SendNotification([]byte(subscriberData.Data), s, &webpush.Options{
-			Subscriber:      subscriberData.Options.Subscriber,
-			VAPIDPublicKey:  subscriberData.Options.VAPIDPublicKey,
-			VAPIDPrivateKey: subscriberData.Options.VAPIDPrivateKey,
-			TTL:             subscriberData.Options.TTL,
-		})
+		_, err = webpush.SendNotification([]byte(subscriberData.Data), s, &subscriberData.Options)
 
 		// TODO: find the correct code for unsubscribe
 		if err != nil {
 			fmt.Println("webpush error:", err)
-			subscriberCol := db.Collection("notificationsubscribers")
 			_, _ = subscriberCol.UpdateOne(
 				dbCtx,
 				bson.M{"_id": subscriberData.SubscriberID},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
@@ -100,7 +101,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 			query["segmentations"] = bson.M{"$in": segmentIds}
 		}
 
-		webPushOptions := core.WebPushOptions{
+		webPushOptions := webpush.Options{
 			Subscriber:      "https://omnikick.com/",
 			VAPIDPublicKey:  notification.VapidDetails.VapidPublicKeys,
 			VAPIDPrivateKey: notification.VapidDetails.VapidPrivateKeys,

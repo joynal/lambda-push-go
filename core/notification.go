@@ -87,13 +87,6 @@ type VAPIDOptions struct {
 	PrivateKey string `json:"privateKey"`
 }
 
-type WebPushOptions struct {
-	Subscriber      string
-	VAPIDPublicKey  string
-	VAPIDPrivateKey string
-	TTL             int `json:"TTL"`
-}
-
 type ProcessedNotification struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty"`
 	SiteID        primitive.ObjectID `bson:"siteId"`

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/SherClockHolmes/webpush-go"
 	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
@@ -54,6 +55,6 @@ type Subscriber struct {
 type SubscriberPayload struct {
 	PushEndpoint string `bson:"pushEndPoint"`
 	Data         string
-	Options      WebPushOptions
+	Options      webpush.Options
 	SubscriberID primitive.ObjectID `bson:"subscriberId"`
 }
