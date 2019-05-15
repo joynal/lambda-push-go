@@ -1,10 +1,46 @@
 service: golang-rnd
 
+# Custom Variables
+custom:
+  stages:
+    - local
+    - dev
+    - staging
+    - prod
+  dbUrl:
+    local: mongodb://localhost:27017/mnapi
+    dev: mongodb://172.31.3.201:27017/growthfunnel-dev
+    staging: mongodb://172.31.14.121:27017/crazyengage-dev
+    prod: mongodb://mongodb:password@172.31.13.179:35071/crazyengage?authSource=admin
+  parserBatchSize: 500
+
 provider:
   name: aws
   runtime: go1.x
   region: us-east-1
   memorySize: 128
+  stage: ${opt:stage,'dev'}
+
+  # Environment Variables
+  environment:
+    ENV: ${self:provider.stage}
+    MONGODB_URL: ${self:custom.dbUrl.${self:provider.stage}}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+        - kinesis:PutRecords
+      Resource: "*"
+
+  vpc:
+    securityGroupIds:
+      - sg-0cd250938bd16ea52
+    subnetIds:
+      - subnet-067712cb0ed891888
+      - subnet-04fd1d22fa5674c04
+      - subnet-03cbc7a16f1d73089
 
 package:
   exclude:
@@ -13,10 +49,36 @@ package:
   - ./bin/**
 
 functions:
-  parser:
-    handler: bin/parser
+  sender:
+    handler: bin/sender
+    timeout: 300
+    memorySize: 1024
     events:
       - stream:
-          arn: arn:aws:kinesis:us-east-1:602579302611:stream/test-parser
+          arn: arn:aws:kinesis:us-east-1:602579302611:stream/go-test-notifications
+          batchSize: 1000
+          startingPosition: LATEST
+      # Ping every 30 minutes to avoid cold starts
+#      - schedule:
+#          rate: rate(30 minutes)
+#          enabled: true
+
+  parser:
+    handler: bin/parser
+    memorySize: 1536
+    environment:
+      PARSER_BATCH_SIZE: ${self:custom.parserBatchSize}
+      SENDER_STREAM_NAME: go-test-notifications
+    events:
+      - stream:
+          arn: arn:aws:kinesis:us-east-1:602579302611:stream/go-test-raw-notifications
           batchSize: 1
           startingPosition: LATEST
+      # Ping every 30 minutes to avoid cold starts
+#      - schedule:
+#          rate: rate(30 minutes)
+#          enabled: true
+
+plugins:
+  - serverless-offline
+  - serverless-stage-manager

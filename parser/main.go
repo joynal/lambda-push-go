@@ -26,7 +26,6 @@ import (
 const dbUrl = "mongodb://localhost:27017"
 const batchSize = 10
 const stream = "test-parser"
-const region = "us-east-1"
 
 func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.Context, events.KinesisEvent) (core.ProcessedNotification, error) {
 	return func (ctx context.Context, event events.KinesisEvent) (core.ProcessedNotification, error) {
@@ -215,7 +214,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 }
 
 func main() {
-	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
+	s, _ := session.NewSession()
 	kc := kinesis.New(s)
 	lc := lambdaSdk.New(s)
 

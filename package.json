@@ -1,0 +1,9 @@
+{
+  "name": "lambda-push-service",
+  "version": "1.0.0",
+  "author": "Joynal Abedin",
+  "devDependencies": {
+    "serverless-offline": "^4.10.2",
+    "serverless-stage-manager": "^1.0.5"
+  }
+}

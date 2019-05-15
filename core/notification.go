@@ -133,9 +133,6 @@ type NotificationAccount struct {
 	TotalUnSubscriber int                `bson:"totalUnSubscriber"`
 	Status            bool               `bson:"status"`
 	HTTPSEnabled      bool               `bson:"httpsEnabled"`
-	IsFcmEnabled      bool               `bson:"isFcmEnabled"`
-	FcmSenderId       string             `bson:"FcmSenderId"`
-	FcmServerKey      string             `bson:"FcmServerKey"`
 	IsDeleted         bool               `bson:"isDeleted"`
 	SiteID            primitive.ObjectID `bson:"siteId"`
 	UserID            primitive.ObjectID `bson:"userId"`

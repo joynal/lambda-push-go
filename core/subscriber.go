@@ -44,8 +44,6 @@ type Subscriber struct {
 	Country       string
 	Language      string
 	UsageDuration int                  `bson:"usageDuration"`
-	IsFcmEnabled  bool                 `bson:"isFcmEnabled"`
-	FcmSenderId   string               `bson:"FcmSenderId"`
 	Segments      []primitive.ObjectID `bson:"segments"`
 	IsDeleted     bool                 `bson:"isDeleted"`
 	CreatedAt     time.Time            `bson:"createdAt"`
