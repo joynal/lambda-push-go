@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
 	"log"
 
 	"lambda-push-go/core"
@@ -17,7 +18,7 @@ import (
 
 const dbUrl = "mongodb://localhost:27017"
 
-func handler(ctx context.Context, event events.KinesisEvent) (bool, error) {
+func handler(ctx context.Context, event events.KinesisEvent) {
 	// Db connection stuff
 	dbCtx := context.Background()
 	dbCtx, cancel := context.WithCancel(dbCtx)
@@ -32,37 +33,45 @@ func handler(ctx context.Context, event events.KinesisEvent) (bool, error) {
 	fmt.Println("Connected to MongoDB!")
 
 	subscriberCol := db.Collection("notificationsubscribers")
-	var subscriberData core.SubscriberPayload
 	for _, record := range event.Records {
-		err = json.Unmarshal(record.Kinesis.Data, &subscriberData)
+		_, _ = sendNotification(record.Kinesis.Data, subscriberCol, dbCtx)
+	}
+}
+
+func sendNotification(record []byte, subscriberCol *mongo.Collection, dbCtx context.Context) (bool, error) {
+	var subscriberData core.SubscriberPayload
+	err := json.Unmarshal(record, &subscriberData)
+
+	if err != nil {
+		fmt.Println("json err:", err)
+		return false, err
+	}
+
+	// Decode subscription
+	s := &webpush.Subscription{}
+	err = json.Unmarshal([]byte(subscriberData.PushEndpoint), s)
+
+	if err != nil {
+		fmt.Println("endpoint err:", err)
+		return false, err
+	}
+
+	// Send Notification
+	_, err = webpush.SendNotification([]byte(subscriberData.Data), s, &subscriberData.Options)
+
+	// TODO: find the correct code for unsubscribe
+	if err != nil {
+		fmt.Println("webpush error:", err)
+		_, err = subscriberCol.UpdateOne(
+			dbCtx,
+			bson.M{"_id": subscriberData.SubscriberID},
+			bson.M{"$set": bson.M{"status": "unSubscribed"}})
 
 		if err != nil {
-			fmt.Println("json err:", err)
+			fmt.Println("db update err:", err)
 		}
 
-		// Decode subscription
-		s := &webpush.Subscription{}
-		_ = json.Unmarshal([]byte(subscriberData.PushEndpoint), s)
-
-		if err != nil {
-			fmt.Println("endpoint err:", err)
-		}
-
-		// Send Notification
-		_, err := webpush.SendNotification([]byte(subscriberData.Data), s, &subscriberData.Options)
-
-		// TODO: find the correct code for unsubscribe
-		if err != nil {
-			fmt.Println("webpush error:", err)
-			_, err = subscriberCol.UpdateOne(
-				dbCtx,
-				bson.M{"_id": subscriberData.SubscriberID},
-				bson.M{"$set": bson.M{"status": "unSubscribed"}})
-
-			if err != nil {
-				fmt.Println("db update err:", err)
-			}
-		}
+		return false, err
 	}
 
 	return true, nil

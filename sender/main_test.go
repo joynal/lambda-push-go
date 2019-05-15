@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"lambda-push-go/core"
+	"log"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -13,7 +15,6 @@ import (
 
 var _ = Describe("parser lambda function", func() {
 	var (
-		ctx      context.Context
 		err      error
 		response bool
 	)
@@ -46,7 +47,21 @@ var _ = Describe("parser lambda function", func() {
 				SubscriberID: subscriberId,
 			})
 
-			response, err = handler(ctx, core.ProcessEvent(string(data)))
+			dbCtx := context.Background()
+			dbCtx, cancel := context.WithCancel(dbCtx)
+			defer cancel()
+
+			dbCtx = context.WithValue(dbCtx, core.DbURL, dbUrl)
+			db, err := core.ConfigDB(dbCtx, "omnikick")
+			if err != nil {
+				log.Fatalf("database configuration failed: %v", err)
+			}
+
+			fmt.Println("Connected to MongoDB!")
+
+			subscriberCol := db.Collection("notificationsubscribers")
+
+			response, err = sendNotification(data, subscriberCol, dbCtx)
 		})
 
 		It("will send notification", func() {
