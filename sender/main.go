@@ -49,9 +49,7 @@ func handler(ctx context.Context, event events.KinesisEvent) (bool, error) {
 		}
 
 		// Send Notification
-		res, err := webpush.SendNotification([]byte(subscriberData.Data), s, &subscriberData.Options)
-
-		fmt.Println("response:", res)
+		_, err := webpush.SendNotification([]byte(subscriberData.Data), s, &subscriberData.Options)
 
 		// TODO: find the correct code for unsubscribe
 		if err != nil {
