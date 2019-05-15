@@ -50,7 +50,7 @@ var _ = Describe("parser lambda function", func() {
 	Context("When the notification payload is plain text", func() {
 		BeforeEach(func() {
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, core.ProcessEvent("Test string"))
+			response, err = parserLambda(ctx, core.ProcessEvent([]byte("Test string")))
 		})
 
 		It("Fails", func() {
@@ -63,7 +63,7 @@ var _ = Describe("parser lambda function", func() {
 		BeforeEach(func() {
 			notificationStr, _ := json.Marshal(notification)
 			parserLambda := handler(kc, lc)
-			response, err = parserLambda(ctx, core.ProcessEvent(string(notificationStr)))
+			response, err = parserLambda(ctx, core.ProcessEvent(notificationStr))
 		})
 
 		It("should move to next", func() {
