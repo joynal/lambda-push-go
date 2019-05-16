@@ -6,10 +6,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/kinesis/kinesisiface"
 	"github.com/aws/aws-sdk-go/service/lambda/lambdaiface"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"lambda-push-go/core"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"lambda-push-go/core"
+	"os"
 )
 
 var _ = Describe("parser lambda function", func() {
@@ -23,6 +23,9 @@ var _ = Describe("parser lambda function", func() {
 	)
 
 	BeforeEach(func() {
+		_ = os.Setenv("MONGODB_URL", "mongodb://localhost:27017")
+		_ = os.Setenv("PARSER_BATCH_SIZE", "10")
+		_ = os.Setenv("QUERY_BATCH_SIZE", "10")
 		kc = &mockKinesisClient{}
 		lc = &mockLambdaClient{}
 		notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")

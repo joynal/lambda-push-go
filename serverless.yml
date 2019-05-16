@@ -68,6 +68,7 @@ functions:
     memorySize: 1536
     environment:
       PARSER_BATCH_SIZE: ${self:custom.parserBatchSize}
+      QUERY_BATCH_SIZE: 1000
       SENDER_STREAM_NAME: go-test-notifications
     events:
       - stream:

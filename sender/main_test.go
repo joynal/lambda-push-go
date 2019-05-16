@@ -8,6 +8,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"lambda-push-go/core"
 	"log"
+	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -21,6 +22,7 @@ var _ = Describe("parser lambda function", func() {
 
 	Context("When the notification payload is plain text", func() {
 		BeforeEach(func() {
+			_ = os.Setenv("MONGODB_URL", "mongodb://localhost:27017")
 			notificationPayloadStr, _ := json.Marshal(core.NotificationPayload{
 				LaunchURL: "https://joynal.github.com",
 				Message: core.Message{
@@ -51,7 +53,7 @@ var _ = Describe("parser lambda function", func() {
 			dbCtx, cancel := context.WithCancel(dbCtx)
 			defer cancel()
 
-			dbCtx = context.WithValue(dbCtx, core.DbURL, dbUrl)
+			dbCtx = context.WithValue(dbCtx, core.DbURL, os.Getenv("MONGODB_URL"))
 			db, err := core.ConfigDB(dbCtx, "omnikick")
 			if err != nil {
 				log.Fatalf("database configuration failed: %v", err)

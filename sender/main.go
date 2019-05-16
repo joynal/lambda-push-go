@@ -7,6 +7,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"log"
+	"os"
 
 	"lambda-push-go/core"
 
@@ -16,9 +17,9 @@ import (
 	"github.com/SherClockHolmes/webpush-go"
 )
 
-const dbUrl = "mongodb://localhost:27017"
-
 func handler(ctx context.Context, event events.KinesisEvent) {
+	// prepare configs
+	dbUrl := os.Getenv("MONGODB_URL")
 	// Db connection stuff
 	dbCtx := context.Background()
 	dbCtx, cancel := context.WithCancel(dbCtx)

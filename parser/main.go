@@ -20,15 +20,18 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"lambda-push-go/core"
 	"log"
+	"os"
+	"strconv"
 	"time"
 )
 
-const dbUrl = "mongodb://localhost:27017"
-const batchSize = 10
-const stream = "test-parser"
-
 func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.Context, events.KinesisEvent) (core.ProcessedNotification, error) {
 	return func (ctx context.Context, event events.KinesisEvent) (core.ProcessedNotification, error) {
+		// prepare configs
+		dbUrl := os.Getenv("MONGODB_URL")
+		batchSize, _ := strconv.Atoi(os.Getenv("PARSER_BATCH_SIZE"))
+		queryBatchSize, _ := strconv.Atoi(os.Getenv("QUERY_BATCH_SIZE"))
+
 		// Db connection stuff
 		dbCtx := context.Background()
 		dbCtx, cancel := context.WithCancel(dbCtx)
@@ -120,7 +123,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 
 		// query options, limit size
 		opts := options.Find()
-		opts.SetLimit(int64(batchSize))
+		opts.SetLimit(int64(queryBatchSize))
 
 		subscriberCol := db.Collection("notificationsubscribers")
 		var subscribers []*kinesis.PutRecordsRequestEntry
@@ -163,7 +166,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 		}
 
 		// send to kinesis
-		streamName := aws.String(stream)
+		streamName := aws.String(os.Getenv("SENDER_STREAM_NAME"))
 		if len(subscribers) > 0 {
 			_, err := kc.PutRecords(&kinesis.PutRecordsInput{
 				Records:    subscribers,
