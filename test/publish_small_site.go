@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"log"
 
 	"lambda-push-go/core"
@@ -18,7 +19,7 @@ import (
 
 func main() {
 	dbUrl := "mongodb://localhost:27017"
-	stream := "test-parser"
+	stream := "go-test-raw-notifications"
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -35,13 +36,14 @@ func main() {
 	var notification core.Notification
 	var notificationAccount core.NotificationAccount
 
-	err = db.Collection("notifications").FindOne(ctx, bson.D{}).Decode(&notification)
+	notificationID, _ := primitive.ObjectIDFromHex("5cb854c0b565fc06edf6ee64")
+	err = db.Collection("notifications").FindOne(ctx, bson.M{"_id": notificationID}).Decode(&notification)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.Collection("notificationaccounts").FindOne(ctx, bson.D{}).Decode(&notificationAccount)
+	err = db.Collection("notificationaccounts").FindOne(ctx, bson.M{"siteId": notification.SiteID}).Decode(&notificationAccount)
 
 	if err != nil {
 		log.Fatal(err)

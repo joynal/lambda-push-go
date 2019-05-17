@@ -158,6 +158,8 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 				PartitionKey: aws.String(id.String()),
 			})
 
+			fmt.Println("subscriberId:", elem.ID)
+
 			notification.LastID = elem.ID
 		}
 
