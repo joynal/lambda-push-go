@@ -70,7 +70,7 @@ type Notification struct {
 	SiteID             primitive.ObjectID `bson:"siteId"`
 	Messages           []Message
 	Browsers           []Browser
-	Actions            Action
+	Actions            []Action
 	HideRules          HideRule           `bson:"hideRules"`
 	LaunchURL          string             `bson:"launchUrl"`
 	UserID             primitive.ObjectID `bson:"userId"`

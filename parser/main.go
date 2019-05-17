@@ -219,7 +219,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 }
 
 func main() {
-	s, _ := session.NewSession()
+	s, _ := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
 	kc := kinesis.New(s)
 	lc := lambdaSdk.New(s)
 

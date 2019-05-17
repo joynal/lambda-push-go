@@ -18,15 +18,16 @@ import (
 )
 
 func main() {
-	dbUrl := "mongodb://localhost:27017"
+	dbUrl := "mongodb://34.233.221.110:27017/growthfunnel-dev"
 	stream := "go-test-raw-notifications"
+	region := "us-east-1"
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	ctx = context.WithValue(ctx, core.DbURL, dbUrl)
-	db, err := core.ConfigDB(ctx, "omnikick")
+	db, err := core.ConfigDB(ctx, "growthfunnel-dev")
 	if err != nil {
 		log.Fatalf("database configuration failed: %v", err)
 	}
@@ -65,7 +66,7 @@ func main() {
 		VapidDetails: notificationAccount.VapidDetails,
 	})
 
-	s, _ := session.NewSession()
+	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 
 	streamName := aws.String(stream)

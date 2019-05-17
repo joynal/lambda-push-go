@@ -19,6 +19,7 @@ import (
 func main() {
 	dbUrl := "mongodb://localhost:27017"
 	stream := "test-parser"
+	region := "us-east-1"
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -63,7 +64,7 @@ func main() {
 		VapidDetails: notificationAccount.VapidDetails,
 	})
 
-	s, _ := session.NewSession()
+	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
 	kc := kinesis.New(s)
 
 	streamName := aws.String(stream)
