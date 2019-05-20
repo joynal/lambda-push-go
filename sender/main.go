@@ -20,13 +20,14 @@ import (
 func handler(ctx context.Context, event events.KinesisEvent) {
 	// prepare configs
 	dbUrl := os.Getenv("MONGODB_URL")
+	dbName := "growthfunnel-dev"
 	// Db connection stuff
 	dbCtx := context.Background()
 	dbCtx, cancel := context.WithCancel(dbCtx)
 	defer cancel()
 
 	dbCtx = context.WithValue(dbCtx, core.DbURL, dbUrl)
-	db, err := core.ConfigDB(dbCtx, "omnikick")
+	db, err := core.ConfigDB(dbCtx, dbName)
 	if err != nil {
 		log.Fatalf("database configuration failed: %v", err)
 	}

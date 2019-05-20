@@ -29,6 +29,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 	return func (ctx context.Context, event events.KinesisEvent) (core.ProcessedNotification, error) {
 		// prepare configs
 		dbUrl := os.Getenv("MONGODB_URL")
+		dbName := "growthfunnel-dev"
 		batchSize, _ := strconv.Atoi(os.Getenv("PARSER_BATCH_SIZE"))
 		queryBatchSize, _ := strconv.Atoi(os.Getenv("QUERY_BATCH_SIZE"))
 
@@ -38,7 +39,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 		defer cancel()
 
 		dbCtx = context.WithValue(dbCtx, core.DbURL, dbUrl)
-		db, err := core.ConfigDB(dbCtx, "omnikick")
+		db, err := core.ConfigDB(dbCtx, dbName)
 		if err != nil {
 			log.Fatalf("database configuration failed: %v", err)
 		}
@@ -158,8 +159,6 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 				PartitionKey: aws.String(id.String()),
 			})
 
-			fmt.Println("subscriberId:", elem.ID)
-
 			notification.LastID = elem.ID
 		}
 
@@ -209,6 +208,8 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 		if err != nil {
 			fmt.Println("invoke error:", err)
 		}
+
+		fmt.Println("invoke result:", string(result.Payload))
 
 		if err == nil && *result.StatusCode == 200 {
 			return notification, nil
