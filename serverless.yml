@@ -12,6 +12,11 @@ custom:
     dev: mongodb://172.31.3.201:27017/growthfunnel-dev
     staging: mongodb://172.31.14.121:27017/crazyengage-dev
     prod: mongodb://mongodb:password@172.31.13.179:35071/crazyengage?authSource=admin
+  dbName:
+    local: mnapi
+    dev: growthfunnel-dev
+    staging: crazyengage-dev
+    prod: crazyengage
   parserBatchSize: 500
 
 provider:
@@ -25,6 +30,7 @@ provider:
   environment:
     ENV: ${self:provider.stage}
     MONGODB_URL: ${self:custom.dbUrl.${self:provider.stage}}
+    DB_NAME: ${self:custom.dbName.${self:provider.stage}}
 
   iamRoleStatements:
     - Effect: Allow

@@ -29,7 +29,7 @@ func handler(kc kinesisiface.KinesisAPI, lc lambdaiface.LambdaAPI) func(context.
 	return func (ctx context.Context, event events.KinesisEvent) (core.ProcessedNotification, error) {
 		// prepare configs
 		dbUrl := os.Getenv("MONGODB_URL")
-		dbName := "growthfunnel-dev"
+		dbName := os.Getenv("DB_NAME")
 		batchSize, _ := strconv.Atoi(os.Getenv("PARSER_BATCH_SIZE"))
 		queryBatchSize, _ := strconv.Atoi(os.Getenv("QUERY_BATCH_SIZE"))
 

@@ -20,7 +20,7 @@ import (
 func handler(ctx context.Context, event events.KinesisEvent) {
 	// prepare configs
 	dbUrl := os.Getenv("MONGODB_URL")
-	dbName := "growthfunnel-dev"
+	dbName := os.Getenv("DB_NAME")
 	// Db connection stuff
 	dbCtx := context.Background()
 	dbCtx, cancel := context.WithCancel(dbCtx)
