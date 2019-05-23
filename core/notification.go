@@ -101,8 +101,6 @@ type ProcessedNotification struct {
 	IsAtLocalTime bool         `bson:"isAtLocalTime"`
 	VapidDetails  VapidDetails `bson:"vapidDetails"`
 	Timezone      string
-	NoOfCalls     int                `bson:"noOfCalls"`
-	LastID        primitive.ObjectID `bson:"lastId"`
 }
 
 type NotificationPayload struct {
