@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/SherClockHolmes/webpush-go"
+	"github.com/joho/godotenv"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"lambda-push-go/core"
 	"log"
@@ -15,10 +16,16 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	// prepare configs
 	dbUrl := os.Getenv("MONGODB_URL")
 	dbName := os.Getenv("DB_NAME")
-	topicName := os.Getenv("SENDER_STREAM_NAME")
+	parserTopic := os.Getenv("PARSER_TOPIC")
+	senderTopic := os.Getenv("SENDER_TOPIC")
 
 	// Db connection stuff
 	ctx := context.Background()
@@ -41,7 +48,7 @@ func main() {
 
 	var mu sync.Mutex
 	var notification core.ProcessedNotification
-	sub := client.Subscription(topicName)
+	sub := client.Subscription(parserTopic)
 	cctx, _ := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
@@ -96,7 +103,7 @@ func main() {
 	defer cur.Close(ctx)
 
 	// Iterate through the cursor
-	topic := client.Topic(topicName)
+	topic := client.Topic(senderTopic)
 	for cur.Next(ctx) {
 		var elem core.Subscriber
 		err := cur.Decode(&elem)

@@ -23,7 +23,7 @@ func main() {
 
 	dbUrl := os.Getenv("MONGODB_URL")
 	dbName := os.Getenv("DB_NAME")
-	stream := "test-parser"
+	stream := os.Getenv("PARSER_TOPIC")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
