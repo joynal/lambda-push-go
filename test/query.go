@@ -3,22 +3,30 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"log"
+	"os"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"lambda-push-go/core"
 )
 
 func main() {
-	dbUrl := "mongodb://localhost:27017/mnapi"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dbUrl := os.Getenv("MONGODB_URL")
+	dbName := os.Getenv("DB_NAME")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	ctx = context.WithValue(ctx, core.DbURL, dbUrl)
-	db, err := core.ConfigDB(ctx, "mnapi")
+	db, err := core.ConfigDB(ctx, dbName)
 	if err != nil {
 		log.Fatalf("database configuration failed: %v", err)
 	}

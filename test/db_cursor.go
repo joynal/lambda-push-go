@@ -18,13 +18,14 @@ func main() {
 	}
 
 	dbUrl := os.Getenv("MONGODB_URL")
+	dbName := os.Getenv("DB_NAME")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	ctx = context.WithValue(ctx, core.DbURL, dbUrl)
-	db, err := core.ConfigDB(ctx, "omnikick")
+	db, err := core.ConfigDB(ctx, dbName)
 	if err != nil {
 		log.Fatalf("database configuration failed: %v", err)
 	}

@@ -1,33 +1,36 @@
 package main
 
 import (
+	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"log"
+	"os"
 
 	"lambda-push-go/core"
 
-	"github.com/google/uuid"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 func main() {
-	dbUrl := "mongodb://34.233.221.110:27017/growthfunnel-dev"
-	stream := "go-test-raw-notifications"
-	region := "us-east-1"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dbUrl := os.Getenv("MONGODB_URL")
+	dbName := os.Getenv("DB_NAME")
+	stream := "test-parser"
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	ctx = context.WithValue(ctx, core.DbURL, dbUrl)
-	db, err := core.ConfigDB(ctx, "growthfunnel-dev")
+	db, err := core.ConfigDB(ctx, dbName)
 	if err != nil {
 		log.Fatalf("database configuration failed: %v", err)
 	}
@@ -37,14 +40,14 @@ func main() {
 	var notification core.Notification
 	var notificationAccount core.NotificationAccount
 
-	notificationID, _ := primitive.ObjectIDFromHex("5cb854c0b565fc06edf6ee64")
+	notificationID, _ := primitive.ObjectIDFromHex("5c82455744cd0f069b35daa6")
 	err = db.Collection("notifications").FindOne(ctx, bson.M{"_id": notificationID}).Decode(&notification)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.Collection("notificationaccounts").FindOne(ctx, bson.M{"siteId": notification.SiteID}).Decode(&notificationAccount)
+	err = db.Collection("notificationaccounts").FindOne(ctx, bson.D{}).Decode(&notificationAccount)
 
 	if err != nil {
 		log.Fatal(err)
@@ -66,19 +69,20 @@ func main() {
 		VapidDetails: notificationAccount.VapidDetails,
 	})
 
-	s, _ := session.NewSession(&aws.Config{Region: aws.String(region)})
-	kc := kinesis.New(s)
+	client, err := pubsub.NewClient(ctx, os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	streamName := aws.String(stream)
-	id := uuid.New()
+	topic := client.Topic(stream)
 
-	putOutput, err := kc.PutRecord(&kinesis.PutRecordInput{
-		Data:         processed,
-		StreamName:   streamName,
-		PartitionKey: aws.String(id.String()),
+	result := topic.Publish(ctx, &pubsub.Message{
+		Data: []byte(processed),
 	})
+
+	id, err := result.Get(ctx)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("%v\n", putOutput)
+	fmt.Printf("Sent msg ID: %v\n", id)
 }
