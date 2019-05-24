@@ -63,6 +63,8 @@ func main() {
 		fmt.Println(err)
 	}
 
+	fmt.Printf("notification: %v\n", notification)
+
 	// Lets prepare subscriber query
 	query := bson.M{
 		"siteId": notification.SiteID,

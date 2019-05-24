@@ -4,12 +4,17 @@ import (
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"sync"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	ctx := context.Background()
 
 	client, err := pubsub.NewClient(ctx, os.Getenv("GOOGLE_CLOUD_PROJECT"))
@@ -18,7 +23,7 @@ func main() {
 	}
 
 	var mu sync.Mutex
-	sub := client.Subscription("notification")
+	sub := client.Subscription(os.Getenv("PARSER_TOPIC"))
 	cctx, _ := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
