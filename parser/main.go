@@ -11,7 +11,6 @@ import (
 	"lambda-push-go/core"
 	"log"
 	"os"
-	"sync"
 	"time"
 )
 
@@ -46,13 +45,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var mu sync.Mutex
 	var notification core.ProcessedNotification
 	sub := client.Subscription(parserTopic)
 	cctx, _ := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
-		mu.Lock()
-		defer mu.Unlock()
 		msg.Ack()
 		err = json.Unmarshal(msg.Data, &notification)
 		if err != nil {
@@ -102,7 +98,7 @@ func main() {
 
 		// Iterate through the cursor
 		topic := client.Topic(senderTopic)
-		for cur.Next(ctx) {
+		for cur.Next(ctx) {	
 			var elem core.Subscriber
 			err := cur.Decode(&elem)
 			if err != nil {
