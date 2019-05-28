@@ -96,9 +96,13 @@ func main() {
 		// Close the cursor once finished
 		defer cur.Close(ctx)
 
-		// Iterate through the cursor
+		// topic configs
 		topic := client.Topic(senderTopic)
-		for cur.Next(ctx) {	
+		topic.PublishSettings.CountThreshold = 1000
+		topic.PublishSettings.DelayThreshold = 3 * time.Second
+
+		// Iterate through the cursor
+		for cur.Next(ctx) {
 			var elem core.Subscriber
 			err := cur.Decode(&elem)
 			if err != nil {
@@ -129,6 +133,9 @@ func main() {
 		if err := cur.Err(); err != nil {
 			log.Fatal(err)
 		}
+
+		// stop all topic's go routines
+		topic.Stop()
 
 		// finish the recursion & update notification
 		updateQuery := bson.M{"updatedAt": time.Now()}

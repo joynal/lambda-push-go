@@ -1,5 +1,9 @@
 TODO:
 
+* new:
+    - google pubsub docs
+    - google pubsub async publish
+
 * Add new features:
     - run parser longer
     - long running experiment with fargate
