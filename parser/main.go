@@ -11,6 +11,7 @@ import (
 	"lambda-push-go/core"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -101,12 +102,15 @@ func main() {
 		topic.PublishSettings.CountThreshold = 1000
 		topic.PublishSettings.DelayThreshold = 3 * time.Second
 
+		var wg sync.WaitGroup
+		start := time.Now()
+
 		// Iterate through the cursor
 		for cur.Next(ctx) {
 			var elem core.Subscriber
 			err := cur.Decode(&elem)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalln("encode err:", err)
 			}
 
 			processed, _ := json.Marshal(core.SubscriberPayload{
@@ -120,15 +124,23 @@ func main() {
 				Data: []byte(processed),
 			})
 
-			id, err := result.Get(ctx)
-			if err != nil {
-				fmt.Println(err)
-			}
+			wg.Add(1)
+			go func(res *pubsub.PublishResult) {
+				defer wg.Done()
+
+				id, err := result.Get(ctx)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				fmt.Printf("Sent msg ID: %v\n", id)
+			}(result)
 
 			notification.TotalSent++
-
-			fmt.Printf("Sent msg ID: %v\n", id)
 		}
+
+		wg.Wait()
+		fmt.Println("elapsed:", time.Since(start))
 
 		if err := cur.Err(); err != nil {
 			log.Fatal(err)
