@@ -23,7 +23,7 @@ func main() {
 	}
 
 	var mu sync.Mutex
-	sub := client.Subscription(os.Getenv("PARSER_TOPIC"))
+	sub := client.Subscription(os.Getenv("SENDER_TOPIC"))
 	cctx, _ := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
