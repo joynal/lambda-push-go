@@ -102,6 +102,7 @@ func main() {
 		topic.PublishSettings.CountThreshold = 1000
 		topic.PublishSettings.DelayThreshold = 3 * time.Second
 
+		// wait group for finishing all goroutines
 		var wg sync.WaitGroup
 		start := time.Now()
 

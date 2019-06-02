@@ -5,5 +5,8 @@
   "devDependencies": {
     "serverless-offline": "^4.10.2",
     "serverless-stage-manager": "^1.0.5"
+  },
+  "dependencies": {
+    "serverless-google-cloudfunctions": "^2.3.2"
   }
 }

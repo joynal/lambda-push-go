@@ -1,5 +1,22 @@
 service: golang-rnd
 
+provider:
+  name: google
+  runtime: go111
+  project: adept-mountain-238503
+  credentials: /Volumes/Storage/development/creds/adept-mountain-238503-24a5a1e5e418.json
+  stage: ${opt:stage,'dev'}
+
+package:
+  exclude:
+    - node_modules/**
+    - .gitignore
+    - .git/**
+    - test/**
+    - readme.md
+    - .env*
+    - Makefile
+
 # Custom Variables
 custom:
   stages:
@@ -17,14 +34,6 @@ custom:
     dev: growthfunnel-dev
     staging: crazyengage-dev
     prod: crazyengage
-  parserBatchSize: 500
-
-provider:
-  name: aws
-  runtime: go1.x
-  region: us-east-1
-  memorySize: 128
-  stage: ${opt:stage,'dev'}
 
   # Environment Variables
   environment:
@@ -32,60 +41,17 @@ provider:
     MONGODB_URL: ${self:custom.dbUrl.${self:provider.stage}}
     DB_NAME: ${self:custom.dbName.${self:provider.stage}}
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - lambda:InvokeFunction
-        - lambda:InvokeAsync
-        - kinesis:PutRecords
-      Resource: "*"
-
-  vpc:
-    securityGroupIds:
-      - sg-0cd250938bd16ea52
-    subnetIds:
-      - subnet-067712cb0ed891888
-      - subnet-04fd1d22fa5674c04
-      - subnet-03cbc7a16f1d73089
-
-package:
-  exclude:
-  - ./**
-  include:
-  - ./bin/**
-
 functions:
   sender:
-    handler: bin/sender
-    timeout: 300
+    handler: SendNotification
+    timeout: 2s
     memorySize: 1024
     events:
-      - stream:
-          arn: arn:aws:kinesis:us-east-1:602579302611:stream/go-test-notifications
-          batchSize: 1000
-          startingPosition: LATEST
-      # Ping every 30 minutes to avoid cold starts
-#      - schedule:
-#          rate: rate(30 minutes)
-#          enabled: true
-
-  parser:
-    handler: bin/parser
-    memorySize: 1536
-    environment:
-      PARSER_BATCH_SIZE: ${self:custom.parserBatchSize}
-      QUERY_BATCH_SIZE: 500
-      SENDER_STREAM_NAME: go-test-notifications
-    events:
-      - stream:
-          arn: arn:aws:kinesis:us-east-1:602579302611:stream/go-test-raw-notifications
-          batchSize: 1
-          startingPosition: LATEST
-      # Ping every 30 minutes to avoid cold starts
-#      - schedule:
-#          rate: rate(30 minutes)
-#          enabled: true
+      - event:
+          eventType: providers/cloud.pubsub/eventTypes/topic.publish
+          resource: projects/${self:provider.project}/topics/notification
 
 plugins:
   - serverless-offline
   - serverless-stage-manager
+  - serverless-google-cloudfunctions

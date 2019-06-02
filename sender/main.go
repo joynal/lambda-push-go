@@ -1,23 +1,22 @@
-package main
+package sender
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
 	"log"
 	"os"
 
-	"lambda-push-go/core"
-
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
-
 	"github.com/SherClockHolmes/webpush-go"
+	"lambda-push-go/core"
 )
 
-func handler(ctx context.Context, event events.KinesisEvent) {
+type PubSubMessage struct {
+	Data []byte `json:"data"`
+}
+
+func SendNotification(ctx context.Context, m PubSubMessage) error {
 	// prepare configs
 	dbUrl := os.Getenv("MONGODB_URL")
 	dbName := os.Getenv("DB_NAME")
@@ -35,18 +34,12 @@ func handler(ctx context.Context, event events.KinesisEvent) {
 	fmt.Println("Connected to MongoDB!")
 
 	subscriberCol := db.Collection("notificationsubscribers")
-	for _, record := range event.Records {
-		_, _ = sendNotification(record.Kinesis.Data, subscriberCol, dbCtx)
-	}
-}
-
-func sendNotification(record []byte, subscriberCol *mongo.Collection, dbCtx context.Context) (bool, error) {
 	var subscriberData core.SubscriberPayload
-	err := json.Unmarshal(record, &subscriberData)
+	err = json.Unmarshal(m.Data, &subscriberData)
 
 	if err != nil {
 		fmt.Println("json err:", err)
-		return false, err
+		return err
 	}
 
 	// Decode subscription
@@ -55,7 +48,7 @@ func sendNotification(record []byte, subscriberCol *mongo.Collection, dbCtx cont
 
 	if err != nil {
 		fmt.Println("endpoint err:", err)
-		return false, err
+		return err
 	}
 
 	// Send Notification
@@ -73,12 +66,8 @@ func sendNotification(record []byte, subscriberCol *mongo.Collection, dbCtx cont
 			fmt.Println("db update err:", err)
 		}
 
-		return false, err
+		return err
 	}
 
-	return true, nil
-}
-
-func main() {
-	lambda.Start(handler)
+	return nil
 }
